@@ -17,7 +17,7 @@ def get_llmextraction_strategy():
 
     llm_extraction_strategy = LLMExtractionStrategy(
         llm_config=llm_config,
-        instruction="Extract all the hackathon information from the page including the name, description, start date, end date, and any other relevant details.",
+        instruction="Extract all the hackathon information from the page including the name, description, start date, end date, Links to the hackathon events and any other relevant details.",
         schema= ExtractSchema.model_json_schema(),
         extraction_type="schema"
     )
