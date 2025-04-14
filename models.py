@@ -6,3 +6,5 @@ class ExtractSchema(BaseModel):
     start_date : str
     end_date: str
     link : str
+
+
