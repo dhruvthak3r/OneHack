@@ -1,2 +1,10 @@
 .env
+test.py
+devfolio_hackathons.json
 
+__init__.py
+
+
+__pycache__/
+.vscode/
+.pytest_cache/
