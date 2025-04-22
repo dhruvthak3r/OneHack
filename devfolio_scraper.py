@@ -1,59 +1,69 @@
-import asyncio
+import re
+import requests
 import json
-import time
 
-from configs import get_browser_config,get_crawler_run_config
+def get_devfolio_response(url: str):
+    """
+    Fetches the Build-id from the devfolio URL. through Page source
+    builds the url and makes a request to the URL to get the response in Json format.
+    Args:
+        url (str): The devfolio URL to scrape.
+    """
+    page_source = requests.get(url)
 
-from crawl4ai import AsyncWebCrawler
+    if page_source.raise_for_status() is None:
+        html = page_source.text
+    else:
+        raise Exception("Error fetching the page source.")
+    
+    match = re.search(r'src="/_next/static/([^/]+)/_buildManifest\.js"', html)
 
-async def get_name_and_links():
-    Browser_config = get_browser_config()
+    if match:
+        build_id = match.group(1)
+        print(f"Build ID: {build_id}")
+    else:
+        raise Exception("Build ID not found.")
 
-    crawler_config = get_crawler_run_config(
-        instruction="Extract all the hackathons from the page. The extracted data should be in JSON format. "
-                    "The JSON format should be like this: "
-                    '[{"name": "Hackathon Name", "link": "https://example.com"}]'
-    )
+    json_url = f'https://devfolio.co/_next/data/{build_id}/hackathons.json'
 
-    async with AsyncWebCrawler(config=Browser_config) as crawler:
-        time.sleep(3)
-        await crawler.awarmup()
-        result = await crawler.arun("https://devfolio.co/hackathons/open", config=crawler_config)
-        print(result.status_code)
-        print(result.extracted_content)
-        extraxted_content_json = json.loads(result.extracted_content)
-        if extraxted_content_json[1]["error"] is not True:
-          with open('devfolio_hackathons.json', 'w') as f:
-            json.dump(extraxted_content_json, f, indent=2)
+    response = requests.get(json_url)
+    if response.raise_for_status() is None:
+         json_response = response.json()
+    else:
+        raise Exception("Error fetching the JSON response.")
+    
+    try:
+        with open('devfolio_hackathons.json', 'w') as f:
+            json.dump(json_response, f, indent=4)
+    except Exception as e:
+        raise Exception(f"Error writing to file: {e}")
+    
+def get_hackathons_info():
+    """
+    Reads the JSON file and extracts hackathon information.
+    Returns:
+        list: A list of dictionaries containing hackathon information.
+    """
+    with open('devfolio_hackathons.json', 'r') as f:
+        data = json.load(f)
 
-async def get_start_and_end_dates():
-    Browser_config = get_browser_config()
+    queries = data["pageProps"]["dehydratedState"]["queries"]
+    open_hackathons = queries[0]["state"]["data"]["open_hackathons"]
 
-    crawler_config = get_crawler_run_config(
-        instruction="Extract all the hackathons from the page. The extracted data should be in JSON format. "
-                    "The JSON format should be like this: "
-                    '[{"start_date": "2023-01-01", "end_date": "2023-12-31"}]'
-    )
-
-    async with AsyncWebCrawler(config=Browser_config) as crawler:
-
-        with open('devfolio_hackathons.json', 'r') as f:
-            devfolio_info = json.load(f)
-          
-        links = [item["link"] for item in devfolio_info]
-
-        for link in links:
-            await crawler.awarmup()
-            result = await crawler.arun(link, config=crawler_config)
-            print(result.status_code)
-            print(result.extracted_content)
-            extraxted_content_json = json.loads(result.extracted_content)
-            if extraxted_content_json[1]["error"] is not True:
-                with open('devfolio_hackathons.json', 'w') as f:
-                    json.dump(extraxted_content_json, f, indent=2)
-       
-if __name__ == "__main__" :
-   asyncio.run(get_name_and_links())
-   asyncio.run(get_start_and_end_dates())
+    result = []
+    for item in open_hackathons:
+        hackathons_info = {
+            "name": item["name"],
+            "slug": item["slug"],
+            "starts_at": item["starts_at"],
+            "ends_at": item["ends_at"]
+        }
+        result.append(hackathons_info)
+    
+    return result
 
 
+
+if __name__ == "__main__":
+    url = 'https://devfolio.co/hackathons/open'
+    get_devfolio_response(url)
