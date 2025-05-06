@@ -1,16 +1,14 @@
 import json
 from schemas.hackathon_schema import HackathonSchema
-from utils import format_datetime
+from utils import read_json_file,format_datetime
 
-def transform_devfolio():
+def transform_devfolio(data):
     """
-    Reads the JSON file and extracts hackathon information.
+    extracts hackathon information from the Json file.
     
     Returns:
         list: A list of dictionaries containing hackathon information.
     """
-    with open('devfolio_hackathons.json', 'r') as f:
-        data = json.load(f)
 
     queries = data["pageProps"]["dehydratedState"]["queries"]
     open_hackathons = queries[0]["state"]["data"]["open_hackathons"]
@@ -31,4 +29,6 @@ def transform_devfolio():
     
     return result
 
-print(transform_devfolio())
+data = read_json_file('devfolio_hackathons.json')
+
+print(transform_devfolio(data))

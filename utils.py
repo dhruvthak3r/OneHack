@@ -23,7 +23,8 @@ def get_headers_for_requests():
     """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0',
-        'Accept': 'application/json',}
+        'Accept': 'application/json',
+        }
     return headers
 
 
@@ -39,3 +40,17 @@ def write_to_json_file(data,filename):
             json.dump(data, f, indent=4)
     except Exception as e:
         raise Exception(f"Error writing to file: {e}")
+    
+
+def read_json_file(filename):
+    """
+    reads the data from a json file
+
+    Args: filename: name of the file to be read from
+    """
+    try:
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        raise Exception(f"Error reading from file: {e}")
