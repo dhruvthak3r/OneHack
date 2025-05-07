@@ -1,4 +1,5 @@
 import json
+import requests
 
 from datetime import datetime
 
@@ -54,3 +55,22 @@ def read_json_file(filename):
         return data
     except Exception as e:
         raise Exception(f"Error reading from file: {e}")
+
+
+
+def make_request(url : str):
+    """
+    makes the request to the url and returns the response
+
+    Args: url - url to make the request to
+    """
+    try:
+        response = requests.get(url,headers=get_headers_for_requests())
+        response.raise_for_status()
+        return response.json()
+    
+    except requests.exceptions.HTTPError as e:
+        raise Exception(f"HTTP error occurred: {e}")
+    
+    except Exception as e:
+        raise Exception(f"Error fetching the JSON response: {e}")

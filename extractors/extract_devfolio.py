@@ -1,16 +1,14 @@
 import re
 import requests
-import json
 
-from utils import get_headers_for_requests,write_to_json_file
+from utils import write_to_json_file,make_request
 
-def get_devfolio_response(url: str):
+
+def get_build_id_for_devfolio(url: str):
     """
     Fetches the Build-id from the devfolio URL. through Page source
-    builds the url and makes a request to the URL to get the response in Json format.
-    
-    Args:
-        url (str): The devfolio URL to scrape.
+
+    Returns : build-id
     """
     page_source = requests.get(url)
 
@@ -26,13 +24,20 @@ def get_devfolio_response(url: str):
     else:
         raise Exception("Build ID not found.")
 
-    json_url = f'https://devfolio.co/_next/data/{build_id}/hackathons.json'
+    return build_id
 
-    response = requests.get(json_url,headers=get_headers_for_requests())
-    if response.raise_for_status() is None:
-         json_response = response.json()
-    else:
-        raise Exception("Error fetching the JSON response.")
+
+def get_devfolio_response(build_id):
+    """
+    Makes a request to the URL to get the response in Json format.
+    
+    Args:
+        build-id : The build-id for the devfolio url.
+    """
+    
+    url = f'https://devfolio.co/_next/data/{build_id}/hackathons.json'
+
+    json_response = make_request(url)
     
     
     write_to_json_file(json_response, 'devfolio_hackathons.json')
@@ -40,4 +45,4 @@ def get_devfolio_response(url: str):
 
 if __name__ == "__main__":
     url = 'https://devfolio.co/hackathons/open'
-    get_devfolio_response(url)
+    get_devfolio_response(get_build_id_for_devfolio(url))

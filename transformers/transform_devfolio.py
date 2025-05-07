@@ -1,5 +1,6 @@
-import json
+
 from schemas.hackathon_schema import HackathonSchema
+
 from utils import read_json_file,format_datetime
 
 def transform_devfolio(data):
