@@ -4,6 +4,7 @@ test.py
 devfolio_hackathons.json
 unstop_hackathons.json
 devpost_hackathons.json
+dorahacks_hackathons.json
 
 __pycache__/
 **/__init__.py

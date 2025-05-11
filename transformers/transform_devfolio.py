@@ -23,7 +23,7 @@ def transform_devfolio(data):
             ends_at = format_datetime(item["ends_at"]),
             reg_starts_at=format_datetime(item["settings"]["reg_starts_at"]),
             reg_ends_at=format_datetime(item["settings"]["reg_ends_at"]),
-            mode = "Online" if item["is_online"] else "Offline",
+            mode = "online" if item["is_online"] else "offline",
             platform = "Devfolio"
         )
         result.append(devfolio_hackathons.model_dump())

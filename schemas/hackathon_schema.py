@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from datetime import datetime
+from typing import Optional
 
 class HackathonSchema(BaseModel):
     name : str
     link : str
-    starts_at : str
-    ends_at : str
-    reg_starts_at : str
-    reg_ends_at : str
-    mode : str
+    starts_at : Optional[str] = None
+    ends_at : Optional[str] = None
+    reg_starts_at : Optional[str] = None
+    reg_ends_at : Optional[str] = None
+    mode : Optional[str] = None
     platform : str

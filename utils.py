@@ -9,14 +9,92 @@ def format_datetime(date : str):
     
     Args: date: str - ISO 8601 date string
     
-    Returns: str - formatted date string in the format "dd/mm/yy"
+    Returns: str - formatted date string in the format "yy/mm/dd"
     """
 
     date_str = datetime.fromisoformat(date)
 
-    formatted_date = date_str.strftime("%d %B %Y")
+    formatted_date = date_str.strftime("%Y-%m-%d")
 
     return formatted_date
+
+
+def convert_timestamp_to_date(timestamp):
+    """
+    Converts a timestamp to a formatted date string.
+
+    Args:
+        timestamp (int): The timestamp to convert.
+
+    Returns:
+        str: The formatted date string in the format "YYYY-MM-DD".
+    """
+    dt = datetime.fromtimestamp(timestamp)
+    
+    return dt.strftime("%Y-%m-%d")
+    
+
+
+def split_and_format_date(date_str):
+    try:
+        if not date_str or not isinstance(date_str, str):
+            return None, None
+
+        date_str = date_str.replace('–', '-').replace('—', '-').strip() 
+        date_str = ' '.join(date_str.split())  
+        date_str = date_str.replace(',', '')  
+
+        if '-' not in date_str:
+            
+            try:
+                date = datetime.strptime(date_str, "%b %d %Y").strftime("%Y-%m-%d")
+                return date, date
+            except Exception:
+                return None, None
+
+       
+        part1, part2 = [p.strip() for p in date_str.split('-')]
+
+        
+        tokens1 = part1.split()
+        tokens2 = part2.split()
+
+       
+        if len(tokens2) == 2 and len(tokens1) == 2:
+            
+            month = tokens1[0]
+            day1 = tokens1[1]
+            day2, year = tokens2
+            date1 = datetime.strptime(f"{month} {day1} {year}", "%b %d %Y").strftime("%Y-%m-%d")
+            date2 = datetime.strptime(f"{month} {day2} {year}", "%b %d %Y").strftime("%Y-%m-%d")
+            return date1, date2
+
+        try:
+            date1 = datetime.strptime(part1, "%b %d %Y").strftime("%Y-%m-%d")
+            date2 = datetime.strptime(part2, "%b %d %Y").strftime("%Y-%m-%d")
+            return date1, date2
+        except Exception:
+            pass
+
+        
+        if len(tokens1) == 2 and len(tokens2) == 3:
+            year = tokens2[2]
+            date1 = datetime.strptime(f"{tokens1[0]} {tokens1[1]} {year}", "%b %d %Y").strftime("%Y-%m-%d")
+            date2 = datetime.strptime(f"{tokens2[0]} {tokens2[1]} {tokens2[2]}", "%b %d %Y").strftime("%Y-%m-%d")
+            return date1, date2
+
+        
+        if any(char.isdigit() for char in part2):
+            year = tokens2[-1]
+            date1 = datetime.strptime(f"{part1} {year}", "%b %d %Y").strftime("%Y-%m-%d")
+            date2 = datetime.strptime(part2, "%b %d %Y").strftime("%Y-%m-%d")
+            return date1, date2
+
+    except Exception:
+        pass
+
+    return None, None
+
 
 def get_headers_for_requests():
     """
