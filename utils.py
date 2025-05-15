@@ -1,5 +1,6 @@
 import json
 import requests
+import uuid
 
 from datetime import datetime
 
@@ -95,6 +96,17 @@ def split_and_format_date(date_str):
 
     return None, None
 
+def convert_date_string_to_date_object(date_str):
+    """
+    Converts a date string in the format "YYYY-MM-DD" to a date object.
+
+    Args:
+        date_str (str): The date string to convert.
+
+    Returns:
+        datetime.date: The converted date object.
+    """
+    return datetime.strptime(date_str, "%Y-%m-%d").date()
 
 def get_headers_for_requests():
     """
@@ -152,3 +164,12 @@ def make_request(url : str):
     
     except Exception as e:
         raise Exception(f"Error fetching the JSON response: {e}")
+    
+
+
+def generate_uuid():
+    """
+    generates a uuid
+    """
+    return str(uuid.uuid4())
+    
