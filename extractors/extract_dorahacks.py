@@ -1,4 +1,3 @@
-
 from utils import make_request, write_to_json_file
 
 all_pages_json_response = []
@@ -23,12 +22,11 @@ def get_dorahacks_upcoming_response(upcoming_url):
 
 if __name__ == "__main__":
 
- ongoing_url = 'https://dorahacks.io/api/hackathon/?page={}&page_size=12&status=ongoing'
+    ongoing_url = 'https://dorahacks.io/api/hackathon/?page={}&page_size=12&status=ongoing'
+    upcoming_url = 'https://dorahacks.io/api/hackathon/?page=1&page_size=12&status=upcoming'
 
- upcoming_url = 'https://dorahacks.io/api/hackathon/?page=1&page_size=12&status=upcoming'
+    get_dorahacks_ongoing_response(ongoing_url)
+    get_dorahacks_upcoming_response(upcoming_url)
 
-get_dorahacks_ongoing_response(ongoing_url)
-get_dorahacks_upcoming_response(upcoming_url)
-
-write_to_json_file(all_pages_json_response, 'dorahacks_hackathons.json')
+    write_to_json_file(all_pages_json_response, 'dorahacks_hackathons.json')
 

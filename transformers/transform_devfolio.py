@@ -32,4 +32,3 @@ def transform_devfolio(data):
 
 data = read_json_file('devfolio_hackathons.json')
 
-print(transform_devfolio(data))
