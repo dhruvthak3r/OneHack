@@ -2,7 +2,6 @@ from utils import read_json_file,split_and_format_date
 
 from schemas.hackathon_schema import HackathonSchema
 
-data = read_json_file('devpost_hackathons.json')
 
 def transform_devpost(data):
     result = []
@@ -22,6 +21,6 @@ def transform_devpost(data):
             result.append(devpost_hackathons.model_dump())
     return result  
 
-print(transform_devpost(data))
+
 
 

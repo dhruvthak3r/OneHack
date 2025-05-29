@@ -5,7 +5,7 @@ from schemas.hackathon_schema import HackathonSchema
 data = read_json_file('dorahacks_hackathons.json')
 
 
-def transform_dorahacks(data):
+def transform_dorahack(data):
     result = []
     for hackathon_container in data:
       for hackathon in hackathon_container["results"]:
@@ -22,5 +22,5 @@ def transform_dorahacks(data):
         result.append(dorahack_hackathons.model_dump())
     return result
 
-print(transform_dorahacks(data))
+
     

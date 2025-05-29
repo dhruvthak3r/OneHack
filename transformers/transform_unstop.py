@@ -36,7 +36,5 @@ def transform_unstop(list):
     return result
 
 
-data = read_json_file('unstop_hackathons.json')
 
-print(transform_unstop(get_metadata_list(data)))
 

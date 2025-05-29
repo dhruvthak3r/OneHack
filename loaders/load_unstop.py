@@ -1,5 +1,5 @@
 from database.db import connect_to_db
-from database.tables import Platform,Hackathon,Base
+from database.tables import Platform,Base
 
 from db_utils import get_platform, get_hackathon_entry
 
