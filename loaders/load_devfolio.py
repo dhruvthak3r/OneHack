@@ -45,7 +45,3 @@ if __name__ == "__main__":
         
         load_devfolio_hackathons(devfolio_entries=devfolio_entries,session=session)
 
-
-
-
-
