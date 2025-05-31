@@ -16,5 +16,3 @@ def get_devpost_response(base_url: str):
 
     
         write_to_json_file(all_pages_json_response, 'devpost_hackathons.json')
-
-

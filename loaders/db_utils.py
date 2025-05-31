@@ -1,17 +1,16 @@
 from database.tables import Platform,Hackathon
 from utils import generate_uuid,convert_date_string_to_date_object
 
-def get_platform(p_id:int,p_name:str):
 
-    """
-    Returns a Platform object with the given p_id and p_name.
-    If the platform already exists, it returns the existing object.
-    Otherwise, it creates a new Platform object.
-    """
-    return Platform(
-        p_id=p_id,
-        p_name=p_name
+def populate_platform(p_id:int,p_name:str,session):
+
+    platform_entry = Platform(
+        p_id = p_id,
+        p_name = p_name
     )
+
+    session.add(platform_entry)
+
 
 
 def get_hackathon_entry(entry : dict, platform_id:int):

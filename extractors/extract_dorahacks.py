@@ -20,5 +20,3 @@ def get_dorahacks_upcoming_response(upcoming_url):
     all_pages_json_response.append(json_response)
 
 
-
-
