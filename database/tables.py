@@ -26,6 +26,7 @@ class Hackathon(Base):
 
     Hackathon_id = Column(String(36), primary_key=True,autoincrement=False)
     Hackathon_name = Column(String(200), nullable=False)
+    Hackathon_url = Column(String(200), nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     reg_start_date = Column(Date, nullable=False)

@@ -21,6 +21,7 @@ def get_hackathon_entry(entry : dict, platform_id:int):
     return Hackathon(
         Hackathon_id = generate_uuid(),
         Hackathon_name = entry.get("name"),
+        Hackathon_url = entry.get("link"),
         start_date = convert_date_string_to_date_object(entry.get("starts_at")),
         end_date = convert_date_string_to_date_object(entry.get("ends_at")),
         reg_start_date = convert_date_string_to_date_object(entry.get("reg_starts_at")),

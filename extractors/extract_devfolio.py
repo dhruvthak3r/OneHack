@@ -43,6 +43,3 @@ def get_devfolio_response(build_id):
     write_to_json_file(json_response, 'devfolio_hackathons.json')
 
 
-if __name__ == "__main__":
-    url = 'https://devfolio.co/hackathons/open'
-    get_devfolio_response(get_build_id_for_devfolio(url))

@@ -43,5 +43,6 @@ if __name__ == "__main__":
         if session.scalar(select(func.count()).select_from(Platform).where(and_(Platform.p_id == 1, Platform.p_name == 'Devfolio'))) == 0:
           populate_platform(session=session)
         
+        
         load_devfolio_hackathons(devfolio_entries=devfolio_entries,session=session)
 

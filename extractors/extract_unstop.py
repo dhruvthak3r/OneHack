@@ -19,6 +19,3 @@ def get_unstop_response(base_url: str):
 
         write_to_json_file(all_pages_json_response,'unstop_hackathons.json')
 
-if __name__ == "__main__":
-    base_url = 'https://unstop.com/api/public/opportunity/search-result?opportunity=hackathons&per_page=15&oppstatus=open&quickApply=false&distance=50&page={}'
-    get_unstop_response(base_url)

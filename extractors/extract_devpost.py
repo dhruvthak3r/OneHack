@@ -18,7 +18,3 @@ def get_devpost_response(base_url: str):
         write_to_json_file(all_pages_json_response, 'devpost_hackathons.json')
 
 
-if __name__ == "__main__":
-    base_url = 'https://devpost.com/api/hackathons?page={}&status[]=upcoming&status[]=open'
-
-    get_devpost_response(base_url)
