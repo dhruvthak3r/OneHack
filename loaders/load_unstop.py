@@ -9,4 +9,7 @@ def load_unstop_hackathons(unstop_entries : list, session):
     """
 
     for entry in unstop_entries:
-        session.add(get_hackathon_entry(entry,2))
+
+        entry = get_hackathon_entry(entry,2,session)
+        if entry is not None:
+            session.add(entry)
