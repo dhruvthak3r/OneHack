@@ -1,4 +1,4 @@
-from utils import read_json_file,split_and_format_date
+from utils import split_and_format_date
 
 from schemas.hackathon_schema import HackathonSchema
 

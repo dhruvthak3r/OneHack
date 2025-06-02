@@ -1,6 +1,4 @@
 
-from utils import read_json_file
-
 from schemas.hackathon_schema import HackathonSchema
 from utils import format_datetime
 
