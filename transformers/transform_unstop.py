@@ -1,11 +1,12 @@
 
 from schemas.hackathon_schema import HackathonSchema
-from utils import format_datetime
+from utils import format_datetime,read_json_file
 
-def get_metadata_list(data):
+def get_metadata_list(filename):
     """
     Returns a list containing the required informmation for the hackathons
     """
+    data = read_json_file(filename)
     list = []
     for item in data:
         list.extend(item["data"]["data"])

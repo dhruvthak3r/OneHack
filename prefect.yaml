@@ -1,0 +1,48 @@
+# Welcome to your prefect.yaml file! You can use this file for storing and managing
+# configuration for deploying your flows. We recommend committing this file to source
+# control along with your flow code.
+
+# Generic metadata about this project
+name: OneHack
+prefect-version: 3.4.4
+
+# build section allows you to manage and build docker images
+build: null
+
+# push section allows you to manage if and how this project is uploaded to remote locations
+push: null
+
+# pull section allows you to provide instructions for cloning this project in remote locations
+pull:
+- prefect.deployments.steps.set_working_directory:
+    directory: C:\Users\Dhruv\Desktop\dhruvpy\OneHack
+
+# the deployments section allows you to provide configuration for deploying flows
+deployments:
+- name: onehack
+  version: null
+  tags: []
+  concurrency_limit: null
+  description: null
+  entrypoint: orchestrators\orchestrate_pipeline.py:orchestrate_extractors_transformers_and_loaders
+  parameters:
+   devfolio_url: https://devfolio.co/hackathons/open
+   unstop_base_url: https://unstop.com/api/public/opportunity/search-result?opportunity=hackathons&per_page=15&oppstatus=open&quickApply=false&distance=50&page={}
+   devpost_base_url: https://devpost.com/api/hackathons?page={}&status[]=upcoming&status[]=open
+   dorahacks_ongoing_url: https://dorahacks.io/api/hackathon/?page={}&page_size=12&status=ongoing
+   dorahacks_upcoming_url: https://dorahacks.io/api/hackathon/?page=1&page_size=12&status=upcoming
+
+   devfolio_data_filename: devfolio_hackathons.json
+   unstop_data_filename: unstop_hackathons.json
+   devpost_data_filename: devpost_hackathons.json
+   dorahacks_data_filename: dorahacks_hackathons.json
+
+  work_pool:
+    name: onehack_worker
+    work_queue_name: null
+    job_variables: {}
+  schedules:
+  - interval: 300.0
+    anchor_date: '2025-06-02T13:20:09.770891+00:00'
+    timezone: UTC
+    active: true

@@ -7,21 +7,21 @@ from transformers.transform_dorahack import transform_dorahack
 from prefect import task
 
 
-@task
-def orchestrate_transform_devfolio(data):
-    return transform_devfolio(data)
+@task(log_prints=True, retries=3, retry_delay_seconds=5)
+def orchestrate_transform_devfolio(filename):
+    return transform_devfolio(filename)
 
-@task
-def orchestrate_transform_unstop(data):
-    unstop_metadata_list = get_metadata_list(data)
+@task(log_prints=True, retries=3, retry_delay_seconds=5)
+def orchestrate_transform_unstop(filename):
+    unstop_metadata_list = get_metadata_list(filename)
 
     return transform_unstop(unstop_metadata_list)
 
-@task
-def orchestrate_transform_devpost(data):
-    return transform_devpost(data)
+@task(log_prints=True, retries=3, retry_delay_seconds=5)
+def orchestrate_transform_devpost(filename):
+    return transform_devpost(filename)
 
-@task
-def orchestrate_transform_dorahacks(data):
-    return transform_dorahack(data)
+@task(log_prints=True, retries=3, retry_delay_seconds=5)
+def orchestrate_transform_dorahacks(filename):
+    return transform_dorahack(filename)
 

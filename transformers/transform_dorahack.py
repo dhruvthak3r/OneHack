@@ -2,10 +2,10 @@ from utils import read_json_file,convert_timestamp_to_date
 
 from schemas.hackathon_schema import HackathonSchema
 
-data = read_json_file('dorahacks_hackathons.json')
 
-
-def transform_dorahack(data):
+def transform_dorahack(filename):
+    data = read_json_file(filename)
+    
     result = []
     for hackathon_container in data:
       for hackathon in hackathon_container["results"]:

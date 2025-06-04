@@ -1,9 +1,11 @@
-from utils import split_and_format_date
+from utils import split_and_format_date,read_json_file
 
 from schemas.hackathon_schema import HackathonSchema
 
 
-def transform_devpost(data):
+def transform_devpost(filename):
+    data = read_json_file(filename)
+
     result = []
     for hackathon_container in data:  # Proper indentation
         for hackathons in hackathon_container["hackathons"]:
