@@ -1,6 +1,6 @@
 from utils import split_and_format_date,read_json_file
 
-from schemas.hackathon_schema import HackathonSchema
+from models.schemas import HackathonSchema
 
 
 def transform_devpost(filename):

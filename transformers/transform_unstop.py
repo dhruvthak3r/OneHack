@@ -1,5 +1,5 @@
 
-from schemas.hackathon_schema import HackathonSchema
+from models.schemas import HackathonSchema
 from utils import format_datetime,read_json_file
 
 def get_metadata_list(filename):
