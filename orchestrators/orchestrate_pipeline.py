@@ -38,3 +38,16 @@ def orchestrate_extractors_transformers_and_loaders(devfolio_url, unstop_base_ur
      dorahacks_entries = orchestrate_transform_dorahacks(dorahacks_data_filename)
      orchestrate_load_dorahack(dorahacks_entries,session)
 
+#if __name__ == "__main__":
+   #devfolio_url =  'https://devfolio.co/hackathons/open'
+   #unstop_base_url =  'https://unstop.com/api/public/opportunity/search-result?opportunity=hackathons&per_page=15&oppstatus=open&quickApply=false&distance=50&page={}'
+   #devpost_base_url = 'https://devpost.com/api/hackathons?page={}&status[]=upcoming&status[]=open'
+   #dorahacks_ongoing_url= 'https://dorahacks.io/api/hackathon/?page={}&page_size=12&status=ongoing'
+   #dorahacks_upcoming_url =  'https://dorahacks.io/api/hackathon/?page=1&page_size=12&status=upcoming'
+
+   #devfolio_data_filename =  'devfolio_hackathons.json'
+   #unstop_data_filename = 'unstop_hackathons.json'
+   #devpost_data_filename =  'devpost_hackathons.json'
+   #dorahacks_data_filename = 'dorahacks_hackathons.json'
+
+   #orchestrate_extractors_transformers_and_loaders(devfolio_url, unstop_base_url, devpost_base_url, dorahacks_ongoing_url, dorahacks_upcoming_url, devfolio_data_filename, unstop_data_filename, devpost_data_filename, dorahacks_data_filename)

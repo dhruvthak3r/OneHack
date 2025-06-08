@@ -1,3 +1,5 @@
+import json 
+
 from fastapi import FastAPI, Query,Depends,HTTPException
 import uvicorn
 
@@ -39,7 +41,9 @@ async def get_all_hackathons(session :  Session = Depends(get_session),
         hackathons.append(await get_devpost_hackathons(session, mode))
         hackathons.append(await get_dorahacks_hackathons(session, mode))
         
-    return hackathons
+    return {"hackathons": hackathons,
+            "success": True,
+            }
 
 
 @app.get("/get-devfolio")

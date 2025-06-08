@@ -45,7 +45,7 @@ async def get_hackathons_by_platform(
 @asynccontextmanager
 async def lifespan(app : FastAPI):
     engine = connect_to_db()
-    Base.metadata.create_all(engine)
+    #Base.metadata.create_all(engine)
     app.state.Session = sessionmaker(bind=engine)
     
     yield

@@ -32,7 +32,7 @@ def orchestrate_load_unstop(unstop_entries,session):
 
 @task(log_prints=True,retries=3,retry_delay_seconds=5,cache_policy=NO_CACHE)
 def orchestrate_load_devpost(devpost_entries,session):
-    if session.scalar(select(func.count()).select_from(Platform).where(and_(Platform.p_id == 3, Platform.p_name == 'DevPost'))) == 0:
+    if session.scalar(select(func.count()).select_from(Platform).where(and_(Platform.p_id == 3, Platform.p_name == 'Devpost'))) == 0:
         populate_platform(3,"Devpost",session=session)
 
     load_devpost_hackathons(devpost_entries=devpost_entries,session=session)

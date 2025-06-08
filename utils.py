@@ -106,6 +106,8 @@ def convert_date_string_to_date_object(date_str):
     Returns:
         datetime.date: The converted date object.
     """
+    if not date_str:
+        return None
     return datetime.strptime(date_str, "%Y-%m-%d").date()
 
 def get_headers_for_requests():

@@ -15,8 +15,8 @@ def transform_devpost(filename):
                 link=hackathons["url"],
                 starts_at=starts_at,
                 ends_at=ends_at,
-                reg_ends_at=starts_at,
                 reg_starts_at=starts_at,
+                reg_ends_at=ends_at,
                 mode="online" if hackathons["displayed_location"]["location"] == "Online" else "offline",
                 platform="Devpost"
             )
@@ -25,4 +25,7 @@ def transform_devpost(filename):
 
 
 
-
+if __name__ == "__main__":
+    filename = "devpost_hackathons.json"
+    transformed_data = transform_devpost(filename)
+    print(transformed_data)
