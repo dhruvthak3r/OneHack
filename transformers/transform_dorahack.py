@@ -10,12 +10,12 @@ def transform_dorahack(filename):
     for hackathon_container in data:
       for hackathon in hackathon_container["results"]:
         dorahack_hackathons = HackathonSchema(
-           name = hackathon["title"],
-           link = f"https://dorahacks.io/hackathon/{hackathon['uname']}/buidl",
-           starts_at = convert_timestamp_to_date(hackathon["start_time"]),
-           ends_at  = convert_timestamp_to_date(hackathon["end_time"]),
-           reg_starts_at = convert_timestamp_to_date(hackathon["start_time"]),
-           reg_ends_at = convert_timestamp_to_date(hackathon["end_time"]),  
+           title = hackathon["title"],
+           url = f"https://dorahacks.io/hackathon/{hackathon['uname']}/buidl",
+           start_date = convert_timestamp_to_date(hackathon["start_time"]),
+           end_date  = convert_timestamp_to_date(hackathon["end_time"]),
+           reg_start_date = convert_timestamp_to_date(hackathon["start_time"]),
+           reg_end_date = convert_timestamp_to_date(hackathon["end_time"]),  
            mode = "online" if hackathon["venue_address"] is None else "offline",
            platform = "DoraHacks"
         )

@@ -18,12 +18,12 @@ def transform_devfolio(filename):
     result = []
     for item in open_hackathons:
         devfolio_hackathons = HackathonSchema(
-            name = item["name"],
-            link = f"https://{item['slug']}.devfolio.co/",
-            starts_at = format_datetime(item["starts_at"]),
-            ends_at = format_datetime(item["ends_at"]),
-            reg_starts_at=format_datetime(item["settings"]["reg_starts_at"]),
-            reg_ends_at=format_datetime(item["settings"]["reg_ends_at"]),
+            title = item["name"],
+            url = f"https://{item['slug']}.devfolio.co/",
+            start_date = format_datetime(item["starts_at"]),
+            end_date= format_datetime(item["ends_at"]),
+            reg_start_date=format_datetime(item["settings"]["reg_starts_at"]),
+            reg_end_date=format_datetime(item["settings"]["reg_ends_at"]),
             mode = "online" if item["is_online"] else "offline",
             platform = "Devfolio"
         )

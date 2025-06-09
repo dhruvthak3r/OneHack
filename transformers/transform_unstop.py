@@ -20,12 +20,12 @@ def transform_unstop(list):
     result = []
     for meta_data in list:
         unstop_hackathons = HackathonSchema(
-            name = meta_data["title"],
-            link = 'https://unstop.com/' + meta_data["public_url"],
-            starts_at = format_datetime(meta_data["start_date"]),
-            ends_at = format_datetime(meta_data["end_date"]),
-            reg_starts_at = format_datetime(meta_data["regnRequirements"]["start_regn_dt"]),
-            reg_ends_at = format_datetime(meta_data["regnRequirements"]["end_regn_dt"]),
+            title = meta_data["title"],
+            url = 'https://unstop.com/' + meta_data["public_url"],
+            start_date = format_datetime(meta_data["start_date"]),
+            end_date = format_datetime(meta_data["end_date"]),
+            reg_start_date = format_datetime(meta_data["regnRequirements"]["start_regn_dt"]),
+            reg_end_date = format_datetime(meta_data["regnRequirements"]["end_regn_dt"]),
             mode = meta_data["region"],
             platform = "Unstop"
         )
