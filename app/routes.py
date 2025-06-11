@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from app.server_utils import get_hackathons_by_platform,lifespan,get_session,get_hackathons_by_search
 
 
+
+
 app = FastAPI(lifespan=lifespan)
 
 
