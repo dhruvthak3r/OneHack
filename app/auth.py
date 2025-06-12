@@ -42,7 +42,7 @@ async def login(request: Request):
     
     #print("Login Session after setting state:", dict(request.session))
     print("Redirect URI:", redirect_uri)
-    return await oauth.auth0.authorize_redirect(request, redirect_uri)
+    return await oauth.auth0.authorize_redirect(request, redirect_uri,prompt = "login")
 
 @app.get("/callback")
 async def callback(request: Request):
@@ -52,16 +52,33 @@ async def callback(request: Request):
             raise RuntimeError("Auth0 OAuth client is not registered properly.")
         token = await oauth.auth0.authorize_access_token(request)
         request.session["user"] = token
-        return {"token": token, "user": request.session["user"]}
+        return RedirectResponse(
+            url="/home"
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.get("/home")
+async def home(request: Request):
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse(url="/login")
+    
+    # Extract user information from the token
+    user_info = {
+        "name": user.get("userinfo", {}).get("name"),
+        "email": user.get("userinfo", {}).get("email"),
+        "picture": user.get("userinfo", {}).get("picture"),
+    }
+    
+    return {"message": "Welcome to the home page!", "user": user_info}
 
 @app.get("/logout")
-def logout():
+def logout(request : Request):
+    request.session.clear()
     return RedirectResponse(
-        f"https://{os.getenv('auth0_domain')}/v2/logout?returnTo=http://localhost:8080"
+        url= "/home"
     )
 
 
