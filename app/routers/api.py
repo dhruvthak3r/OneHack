@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query,Depends,HTTPException
+from fastapi import FastAPI, Query,Depends,HTTPException,APIRouter
 import uvicorn
 
 from models.schemas import HackathonListResponseSchema
@@ -7,15 +7,19 @@ from typing import Optional,List
 
 from sqlalchemy.orm import Session
 
-from app.server_utils import get_hackathons_by_platform,lifespan,get_session,get_hackathons_by_search
+from app.utils import get_hackathons_by_platform,lifespan,get_session,get_hackathons_by_search
+
+
+router = APIRouter()
 
 
 
 
-app = FastAPI(lifespan=lifespan)
+
+#app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/get-all-hackathons",response_model=HackathonListResponseSchema)
+@router.get("/get-all-hackathons",response_model=HackathonListResponseSchema)
 async def get_all_hackathons(session :  Session = Depends(get_session),
                             platform: Optional[List[str]] = Query(None, alias="p"),
                             mode: Optional[List[str]] = Query(None),
@@ -51,7 +55,7 @@ async def get_all_hackathons(session :  Session = Depends(get_session),
             }
 
 
-@app.get("/get-devfolio")
+@router.get("/get-devfolio")
 async def get_devfolio_hackathons(session: Session = Depends(get_session),
                                   mode: Optional[List[str]] = Query(None),
                                   sort_by_start_date : bool = Query(False, alias="start-date"),
@@ -70,7 +74,7 @@ async def get_devfolio_hackathons(session: Session = Depends(get_session),
             }
 
 
-@app.get("/get-devpost")
+@router.get("/get-devpost")
 async def get_devpost_hackathons(
     session: Session = Depends(get_session),
     mode: Optional[List[str]] = Query(None),
@@ -85,7 +89,7 @@ async def get_devpost_hackathons(
             "success": True,
             }
 
-@app.get("/get-unstop")
+@router.get("/get-unstop")
 async def get_unstop_hackathons(
     session: Session = Depends(get_session),
     mode: Optional[List[str]] = Query(None),
@@ -101,7 +105,7 @@ async def get_unstop_hackathons(
             }
     
 
-@app.get("/get-dorahacks")
+@router.get("/get-dorahacks")
 async def get_dorahacks_hackathons(
     session: Session = Depends(get_session),
     mode: Optional[List[str]] = Query(None),
@@ -117,7 +121,7 @@ async def get_dorahacks_hackathons(
             }
     
 
-@app.get("/search")
+@router.get("/search")
 async def search_hackathons(
     session: Session = Depends(get_session),
     query: str = Query(...,alias="q")
@@ -130,5 +134,3 @@ async def search_hackathons(
     return {"hackathons": hackathons, 
             "success": True}
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)

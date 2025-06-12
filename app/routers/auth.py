@@ -1,7 +1,7 @@
 from authlib.integrations.starlette_client import OAuth
 from auth0.authentication import GetToken, Database
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException,APIRouter
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware  # <-- import SessionMiddleware
 
@@ -14,13 +14,8 @@ secret_key = os.getenv('auth0_client_secret')
 client_id = os.getenv('auth0_client_id')
 auth0_domain = os.getenv('auth0_domain')
 
-app = FastAPI()
+router = APIRouter()
 
-# Use a consistent session secret across all instances
-app.add_middleware(
-    SessionMiddleware,
-    secret_key='zbFPHiEhqWYrH4wiz5NwbZDa49MV9OlYxJf2yRzdxemFhkRmzpWOVwUaCwHnMoQSiYUMDh9ueKjtai_vQbI0Zg'           # recommended setting in many environments
-)
 
 oauth = OAuth()
 
@@ -34,7 +29,7 @@ oauth.register(
     server_metadata_url=f"https://{auth0_domain}/.well-known/openid-configuration"
 )
 
-@app.get("/login")
+@router.get("/login")
 async def login(request: Request):
     redirect_uri = request.url_for('callback')
     if not hasattr(oauth, "auth0") or oauth.auth0 is None:
@@ -44,7 +39,7 @@ async def login(request: Request):
     print("Redirect URI:", redirect_uri)
     return await oauth.auth0.authorize_redirect(request, redirect_uri,prompt = "login")
 
-@app.get("/callback")
+@router.get("/callback")
 async def callback(request: Request):
     #print("Callback Session before validating state:", dict(request.session))
     try:
@@ -53,17 +48,17 @@ async def callback(request: Request):
         token = await oauth.auth0.authorize_access_token(request)
         request.session["user"] = token
         return RedirectResponse(
-            url="/home"
+            url="/auth/home"
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/home")
+@router.get("/home")
 async def home(request: Request):
     user = request.session.get("user")
     if not user:
-        return RedirectResponse(url="/login")
+        return RedirectResponse(url="/auth/login")
     
     # Extract user information from the token
     user_info = {
@@ -74,16 +69,15 @@ async def home(request: Request):
     
     return {"message": "Welcome to the home page!", "user": user_info}
 
-@app.get("/logout")
+@router.get("/logout")
 def logout(request : Request):
     request.session.clear()
     return RedirectResponse(
-        url= "/home"
+        url= "/auth/home"
     )
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+
 
 
 
