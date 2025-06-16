@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Request
+from fastapi.responses import RedirectResponse
 import uvicorn
 
 from routers import auth, api
@@ -14,9 +15,26 @@ app.include_router(api.router, prefix="/api", tags=["api"])
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key='zbFPHiEhqWYrH4wiz5NwbZDa49MV9OlYxJf2yRzdxemFhkRmzpWOVwUaCwHnMoQSiYUMDh9ueKjtai_vQbI0Zg'
+    secret_key='zbFPHiEhqWYrH4wiz5NwbZDa49MV9OlYxJf2yRzdxemFhkRmzpWOVwUaCwHnMoQSiYUMDh9ueKjtai_vQbI0Zg',
 )
 
+@app.get("/")
+async def root(request: Request):
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse(url="/auth/login")
+    
+    #user_info = {
+        #"sub": user.get("userinfo", {}).get("sub"),
+        #"name": user.get("userinfo", {}).get("name"),
+        #"email": user.get("userinfo", {}).get("email"),
+        #"picture": user.get("userinfo", {}).get("picture"),
+        #"sub": user.get("userinfo", {}).get("sub"),
+        #"nickname": user.get("userinfo", {}).get("nickname"),
+        #"name": user.get("userinfo", {}).get("name"),
+    #}
+    
+    return {"message": "Welcome to the home page!", "user": user}
 
 
 if __name__ == "__main__":

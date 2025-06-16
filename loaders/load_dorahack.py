@@ -1,5 +1,5 @@
 
-from loaders.db_utils import get_hackathon_entry
+from loaders.utils import get_hackathon_entry
 
 def load_dorahack_hackathons(dorahack_entries: list, session):
     """

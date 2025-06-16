@@ -1,7 +1,7 @@
 
 from database.tables import Platform
 
-from loaders.db_utils import populate_platform
+from loaders.utils import populate_platform
 from loaders.load_devfolio import load_devfolio_hackathons
 from loaders.load_unstop import load_unstop_hackathons
 from loaders.load_devpost import load_devpost_hackathons

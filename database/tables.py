@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Integer, String,Date, ForeignKey
+from sqlalchemy import Column, Integer, String,Date, ForeignKey,DateTime
 from sqlalchemy.orm import DeclarativeBase,relationship
 
 
@@ -36,4 +36,17 @@ class Hackathon(Base):
     platform_id = Column(Integer, ForeignKey('platform.p_id'), nullable=False)
 
     platform = relationship("Platform", back_populates="hackathons")
+
+
+class Users(Base):
+    """
+    Defines the users table
+    """
+    __tablename__ = 'users'
+
+    sub = Column(String(100), primary_key=True, autoincrement=False)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), nullable=False, unique=True)
+    picture = Column(String(200), nullable=True)
+
 

@@ -1,5 +1,5 @@
 from database.db import connect_to_db
-from database.tables import Platform, Base, Hackathon
+from database.tables import Platform, Base, Hackathon, Users
 
 from fastapi import FastAPI,Request
 
@@ -49,6 +49,7 @@ async def get_hackathons_by_platform(
     return hackathons
 
 
+
 async def get_hackathons_by_search(
     session: Session,
     query: str
@@ -79,6 +80,20 @@ async def get_hackathons_by_search(
     ]
     return hackathons
 
+
+def get_user_info(user,session):
+
+    if session.scalar(select(Users.sub).where(Users.sub == user.get("userinfo", {}).get("sub"))) is None:
+        return Users(
+            sub=user.get("userinfo", {}).get("sub"),
+            name=user.get("userinfo", {}).get("name"),
+            email=user.get("userinfo", {}).get("email"),
+            picture=user.get("userinfo", {}).get("picture"),
+        )
+    else:
+        return None
+
+
 @asynccontextmanager
 async def lifespan(app : FastAPI):
     engine = connect_to_db()
@@ -96,5 +111,6 @@ async def get_session(request : Request):
         yield session
 
     finally:
+        session.commit()
         session.close()
     

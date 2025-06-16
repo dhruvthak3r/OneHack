@@ -1,86 +1,85 @@
 from authlib.integrations.starlette_client import OAuth
-from auth0.authentication import GetToken, Database
 
-from fastapi import FastAPI, Request, HTTPException,APIRouter
+from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from starlette.middleware.sessions import SessionMiddleware  # <-- import SessionMiddleware
+
+from sqlalchemy.orm import Session
+from starlette.status import HTTP_400_BAD_REQUEST
 
 from dotenv import load_dotenv
-load_dotenv()
-import os
-import uvicorn
 
-secret_key = os.getenv('auth0_client_secret')
-client_id = os.getenv('auth0_client_id')
-auth0_domain = os.getenv('auth0_domain')
+import logging
+import os
+
+from app.utils import get_user_info, get_session
+
+load_dotenv()
+
+
+AUTH0_CLIENT_ID = os.getenv("auth0_client_id")
+AUTH0_CLIENT_SECRET = os.getenv("auth0_client_secret")
+AUTH0_DOMAIN = os.getenv("auth0_domain")
+
+if not all([AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN]):
+    raise RuntimeError("Missing one or more Auth0 environment variables.")
+
+
+oauth = OAuth()
+oauth.register(
+    name="auth0",
+    client_id=AUTH0_CLIENT_ID,
+    client_secret=AUTH0_CLIENT_SECRET,
+    client_kwargs={"scope": "openid profile email"},
+    server_metadata_url=f"https://{AUTH0_DOMAIN}/.well-known/openid-configuration",
+)
+
 
 router = APIRouter()
 
 
-oauth = OAuth()
+def get_auth0_client():
+    auth0_client = getattr(oauth, "auth0", None)
+    if not auth0_client:
+        raise RuntimeError("Auth0 client not configured properly.")
+    return auth0_client
 
-oauth.register(
-    name='auth0',
-    client_id=client_id,
-    client_secret=secret_key,
-    client_kwargs={
-        "scope": "openid profile email",
-    },
-    server_metadata_url=f"https://{auth0_domain}/.well-known/openid-configuration"
-)
 
 @router.get("/login")
 async def login(request: Request):
-    redirect_uri = request.url_for('callback')
-    if not hasattr(oauth, "auth0") or oauth.auth0 is None:
-        raise RuntimeError("Auth0 OAuth client is not registered properly.")
-    
-    #print("Login Session after setting state:", dict(request.session))
-    print("Redirect URI:", redirect_uri)
-    return await oauth.auth0.authorize_redirect(request, redirect_uri,prompt = "login")
+    redirect_uri = request.url_for("callback")
+    auth0_client = get_auth0_client()
+    return await auth0_client.authorize_redirect(request, redirect_uri, prompt="login")
+
 
 @router.get("/callback")
-async def callback(request: Request):
-    #print("Callback Session before validating state:", dict(request.session))
+async def callback(
+    request: Request,
+    db_session: Session = Depends(get_session)
+):
     try:
-        if not hasattr(oauth, "auth0") or oauth.auth0 is None:
-            raise RuntimeError("Auth0 OAuth client is not registered properly.")
-        token = await oauth.auth0.authorize_access_token(request)
+        auth0_client = get_auth0_client()
+        token = await auth0_client.authorize_access_token(request)
         request.session["user"] = token
-        return RedirectResponse(
-            url="/auth/home"
-        )
+
+        user = token
+        user_entry = get_user_info(user, db_session)
+
+        if user_entry:
+            db_session.add(user_entry)
+            #db_session.commit()
+        
+
+        return RedirectResponse(url="/")
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logging.error("Auth0 callback failed", exc_info=e)
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Authentication failed. Please try again."
+        )
 
-
-@router.get("/home")
-async def home(request: Request):
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse(url="/auth/login")
-    
-    # Extract user information from the token
-    user_info = {
-        "name": user.get("userinfo", {}).get("name"),
-        "email": user.get("userinfo", {}).get("email"),
-        "picture": user.get("userinfo", {}).get("picture"),
-    }
-    
-    return {"message": "Welcome to the home page!", "user": user_info}
 
 @router.get("/logout")
-def logout(request : Request):
+def logout(request: Request):
     request.session.clear()
-    return RedirectResponse(
-        url= "/auth/home"
-    )
-
-
-
-
-
-
-
-
-
+    return RedirectResponse(url="/")
