@@ -62,7 +62,7 @@ async def callback(
         request.session["user"] = token
 
         user = token
-        user_entry = get_user_info(user, db_session)
+        user_entry = await get_user_info(user, db_session)
 
         if user_entry:
             db_session.add(user_entry)

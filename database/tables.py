@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Integer, String,Date, ForeignKey,DateTime
+from sqlalchemy import Column, Integer, String,Date, ForeignKey
 from sqlalchemy.orm import DeclarativeBase,relationship
 
 
@@ -36,6 +36,7 @@ class Hackathon(Base):
     platform_id = Column(Integer, ForeignKey('platform.p_id'), nullable=False)
 
     platform = relationship("Platform", back_populates="hackathons")
+    bookmarks = relationship("Bookmarks", back_populates="hackathon")
 
 
 class Users(Base):
@@ -50,3 +51,18 @@ class Users(Base):
     picture = Column(String(200), nullable=True)
 
 
+    bookmarks = relationship("Bookmarks", back_populates="user")
+
+
+class Bookmarks(Base):
+    """
+    Defines the bookmarks table
+    """
+    __tablename__ = 'bookmarks'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_sub = Column(String(100), ForeignKey('users.sub'), nullable=False)
+    hackathon_id = Column(String(36), ForeignKey('hackathon.Hackathon_id'), nullable=False)
+
+    user = relationship("Users", back_populates="bookmarks")
+    hackathon = relationship("Hackathon", back_populates="bookmarks")

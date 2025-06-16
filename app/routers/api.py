@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Query,Depends,HTTPException,APIRouter
-import uvicorn
+from fastapi import Query,Depends,HTTPException,APIRouter,Request
+from fastapi.responses import RedirectResponse
 
 from models.schemas import HackathonListResponseSchema
 
@@ -7,16 +7,9 @@ from typing import Optional,List
 
 from sqlalchemy.orm import Session
 
-from app.utils import get_hackathons_by_platform,lifespan,get_session,get_hackathons_by_search
-
+from app.utils import get_hackathons_by_platform,lifespan,get_session,get_hackathons_by_search,get_bookmarky_entry
 
 router = APIRouter()
-
-
-
-
-
-#app = FastAPI(lifespan=lifespan)
 
 
 @router.get("/get-all-hackathons",response_model=HackathonListResponseSchema)
@@ -134,3 +127,23 @@ async def search_hackathons(
     return {"hackathons": hackathons, 
             "success": True}
 
+
+@router.post("/bookmark/{hackathon_id}")
+async def bookmark_hackathon(
+    hackathon_id: str,
+    request: Request,
+    db_session: Session = Depends(get_session),
+):
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse(url="auth/login")
+    
+    user_sub = user.get("userinfo", {}).get("sub")
+
+    bookmark_entry = await get_bookmarky_entry(user_sub,hackathon_id,db_session)
+
+    if bookmark_entry:
+        db_session.add(bookmark_entry)
+    
+
+    return {"message": "Hackathon bookmarked successfully"}

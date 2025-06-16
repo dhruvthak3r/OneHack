@@ -1,10 +1,10 @@
 from database.db import connect_to_db
-from database.tables import Platform, Base, Hackathon, Users
+from database.tables import Platform, Base, Hackathon, Users,Bookmarks
 
 from fastapi import FastAPI,Request
 
 from typing import Optional, List
-from models.schemas import HackathonSchema
+from models.schemas import HackathonResultSchema
 from database.tables import Platform, Hackathon
 from sqlalchemy.orm import Session,sessionmaker
 from sqlalchemy import select, join
@@ -34,7 +34,8 @@ async def get_hackathons_by_platform(
     result = session.execute(query).scalars().all()
 
     hackathons = [
-        HackathonSchema(
+        HackathonResultSchema(
+            id = str(h.Hackathon_id),
             title=str(h.Hackathon_name),
             url=str(h.Hackathon_url),
             start_date=str(h.start_date),
@@ -66,7 +67,8 @@ async def get_hackathons_by_search(
     result = session.execute(stmt).scalars().all()
 
     hackathons = [
-        HackathonSchema(
+        HackathonResultSchema(
+            id = str(h.Hackathon_id),
             title=str(h.Hackathon_name),
             url=str(h.Hackathon_url),
             start_date=str(h.start_date),
@@ -81,7 +83,7 @@ async def get_hackathons_by_search(
     return hackathons
 
 
-def get_user_info(user,session):
+async def get_user_info(user,session):
 
     if session.scalar(select(Users.sub).where(Users.sub == user.get("userinfo", {}).get("sub"))) is None:
         return Users(
@@ -93,11 +95,20 @@ def get_user_info(user,session):
     else:
         return None
 
+async def get_bookmarky_entry(user_sub,hackathon_id,session):
+    if session.scalar(select(Bookmarks.id).where(Bookmarks.user_sub == user_sub,Bookmarks.hackathon_id == hackathon_id)) is None:
+        return Bookmarks(
+            user_sub = user_sub,
+            hackathon_id = hackathon_id
+        )
+    else :
+        return None
+    
 
 @asynccontextmanager
 async def lifespan(app : FastAPI):
     engine = connect_to_db()
-    #Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
     app.state.Session = sessionmaker(bind=engine)
     
     yield
