@@ -1,15 +1,20 @@
 .env
 test.py
 
+# Ignore hackathon data files
 devfolio_hackathons.json
 unstop_hackathons.json
 devpost_hackathons.json
 dorahacks_hackathons.json
 
+# Python cache and test artifacts
 __pycache__/
-**/__init__.py
-.vscode/
+**/__pycache__/
 .pytest_cache/
 
+# VS Code settings
+.vscode/
 
 onehack/
+
+**/__init__.py
