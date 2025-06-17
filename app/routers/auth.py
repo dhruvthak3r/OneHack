@@ -4,11 +4,9 @@ from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_400_BAD_REQUEST
 
 from dotenv import load_dotenv
 
-import logging
 import os
 
 from app.utils import get_user_info, get_session
@@ -72,10 +70,9 @@ async def callback(
         return RedirectResponse(url="/")
 
     except Exception as e:
-        logging.error("Auth0 callback failed", exc_info=e)
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail="Authentication failed. Please try again."
+            status_code=404,
+            detail=f"Authentication failed. Please try again.{e}"
         )
 
 

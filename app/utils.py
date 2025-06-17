@@ -5,7 +5,7 @@ from fastapi import FastAPI,Request
 
 from typing import Optional, List
 from models.schemas import HackathonResultSchema
-from database.tables import Platform, Hackathon
+from database.tables import Platform, Hackathon,Bookmarks,Users
 from sqlalchemy.orm import Session,sessionmaker
 from sqlalchemy import select, join
 
@@ -81,6 +81,37 @@ async def get_hackathons_by_search(
         for h in result
     ]
     return hackathons
+
+async def get_bookmarked_hackathons(session: Session, user_sub: str):
+    stmt = (
+        select(Hackathon)
+        .select_from(
+            join(Hackathon, Platform, Hackathon.platform_id == Platform.p_id)
+            .join(Bookmarks, Bookmarks.hackathon_id == Hackathon.Hackathon_id)
+            .join(Users, Bookmarks.user_sub == Users.sub)
+        )
+        .where(Users.sub == user_sub)
+    )
+
+    result = session.execute(stmt).scalars().all()
+
+    hackathons = [
+        HackathonResultSchema(
+            id=str(h.Hackathon_id),
+            title=str(h.Hackathon_name),
+            url=str(h.Hackathon_url),
+            start_date=str(h.start_date),
+            end_date=str(h.end_date),
+            reg_start_date=str(h.reg_start_date),
+            reg_end_date=str(h.reg_end_date),
+            mode=str(h.mode),
+            platform=h.platform.p_name 
+        )
+        for h in result
+    ]
+
+    return hackathons
+
 
 
 async def get_user_info(user,session):

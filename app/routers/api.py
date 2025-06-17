@@ -1,4 +1,4 @@
-from fastapi import Query,Depends,HTTPException,APIRouter,Request
+from fastapi import Query,Depends,HTTPException,APIRouter,Request,status
 from fastapi.responses import RedirectResponse
 
 from models.schemas import HackathonListResponseSchema
@@ -7,48 +7,58 @@ from typing import Optional,List
 
 from sqlalchemy.orm import Session
 
-from app.utils import get_hackathons_by_platform,lifespan,get_session,get_hackathons_by_search,get_bookmarky_entry
+from app.utils import get_hackathons_by_platform,get_session,get_hackathons_by_search,get_bookmarky_entry,get_bookmarked_hackathons
 
 router = APIRouter()
 
-
-@router.get("/get-all-hackathons",response_model=HackathonListResponseSchema)
-async def get_all_hackathons(session :  Session = Depends(get_session),
-                            platform: Optional[List[str]] = Query(None, alias="p"),
-                            mode: Optional[List[str]] = Query(None),
-                            sort_by_start_date:  bool = Query(False,alias="start-date"),
-                            sort_by_end_date : bool = Query(False,alias="end-date")
-                            ):
+@router.get("/get-all-hackathons",status_code=status.HTTP_200_OK)
+async def get_all_hackathons(
+    session: Session = Depends(get_session),
+    platform: Optional[List[str]] = Query(None, alias="p"),
+    mode: Optional[List[str]] = Query(None),
+    sort_by_start_date: bool = Query(False, alias="start-date"),
+    sort_by_end_date: bool = Query(False, alias="end-date")
+):
     """
     Fetch all hackathons from the database.
     """
-    hackathons = []
-    if platform is not None:
-        for p in platform:
-            if p == 'devfolio':
-                hackathons.append(await get_devfolio_hackathons(session, mode,sort_by_start_date,sort_by_end_date))
-            elif p == 'unstop':
-                hackathons.append(await get_unstop_hackathons(session, mode))
-            elif p == 'devpost':
-                hackathons.append(await get_devpost_hackathons(session, mode))
-            elif p == 'dorahacks':
-                hackathons.append(await get_dorahacks_hackathons(session, mode))
-            elif p not in ["devfolio","unstop","devpost","dorahacks"]:
-                raise HTTPException(status_code=400, detail=f"Invalid platform: {p}")
+    try:
+        hackathons = []
 
-    else:
-        
-        hackathons.append(await get_devfolio_hackathons(session, mode))
-        hackathons.append(await get_unstop_hackathons(session, mode))
-        hackathons.append(await get_devpost_hackathons(session, mode))
-        hackathons.append(await get_dorahacks_hackathons(session, mode))
-        
-    return {"hackathons": hackathons,
-            "success": True,
-            }
+        if platform is not None:
+            for p in platform:
+                if p == 'devfolio':
+                    hackathons += (await get_devfolio_hackathons(session, mode, sort_by_start_date, sort_by_end_date))["hackathons"]
+                elif p == 'unstop':
+                    hackathons += (await get_unstop_hackathons(session, mode,sort_by_start_date, sort_by_end_date))["hackathons"]
+                elif p == 'devpost':
+                    hackathons += (await get_devpost_hackathons(session, mode,sort_by_start_date, sort_by_end_date))["hackathons"]
+                elif p == 'dorahacks':
+                    hackathons += (await get_dorahacks_hackathons(session, mode,sort_by_start_date, sort_by_end_date))["hackathons"]
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Invalid platform: {p}"
+                    )
+        else:
+            hackathons += (await get_devfolio_hackathons(session, mode, sort_by_start_date, sort_by_end_date))["hackathons"]
+            hackathons += (await get_unstop_hackathons(session, mode,sort_by_start_date, sort_by_end_date))["hackathons"]
+            hackathons += (await get_devpost_hackathons(session, mode,sort_by_start_date, sort_by_end_date))["hackathons"]
+            hackathons += (await get_dorahacks_hackathons(session, mode,sort_by_start_date, sort_by_end_date))["hackathons"]
+
+        return {
+            "hackathons": hackathons,
+            "success": True
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error getting hackathons: {e}"
+        )
 
 
-@router.get("/get-devfolio")
+@router.get("/get-devfolio",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
 async def get_devfolio_hackathons(session: Session = Depends(get_session),
                                   mode: Optional[List[str]] = Query(None),
                                   sort_by_start_date : bool = Query(False, alias="start-date"),
@@ -57,78 +67,100 @@ async def get_devfolio_hackathons(session: Session = Depends(get_session),
     """
     Fetch Devfolio hackathons from the database.
     """
-    
-    hackathons = await get_hackathons_by_platform(session, "Devfolio", mode,sort_by_start_date,sort_by_end_date)
-    if not hackathons:
-        raise HTTPException(status_code=404, detail="No Devfolio hackathons found")
-    
-    return {"hackathons": hackathons,
+    try :
+
+     hackathons = await get_hackathons_by_platform(session, "Devfolio", mode,sort_by_start_date,sort_by_end_date)
+
+     return {"hackathons": hackathons,
             "success": True,
             }
+    
+    except Exception as e:
+        raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error getting Devfolio Hackathons : {e}"
+       )
 
-
-@router.get("/get-devpost")
+@router.get("/get-devpost",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
 async def get_devpost_hackathons(
     session: Session = Depends(get_session),
     mode: Optional[List[str]] = Query(None),
     sort_by_start_date : bool = Query(False, alias="start-date"),
     sort_by_end_date : bool = Query(False,alias="end-date")
 ):
-    hackathons = await get_hackathons_by_platform(session, "Devpost", mode,sort_by_start_date,sort_by_end_date)
-    if not hackathons:
-        raise HTTPException(status_code=404, detail="No Devpost hackathons found")
-    
-    return {"hackathons": hackathons,
+    try:
+        hackathons = await get_hackathons_by_platform(session, "Devpost", mode,sort_by_start_date,sort_by_end_date)
+
+        return {"hackathons": hackathons,
             "success": True,
             }
+    except Exception as e:
+        raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error getting Devpost Hackathons : {e}"
+       )
 
-@router.get("/get-unstop")
+@router.get("/get-unstop",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
 async def get_unstop_hackathons(
     session: Session = Depends(get_session),
     mode: Optional[List[str]] = Query(None),
     sort_by_start_date : bool = Query(False, alias="start-date"),
     sort_by_end_date : bool = Query(False,alias="end-date")
 ):
-    hackathons = await get_hackathons_by_platform(session, "Unstop", mode,sort_by_start_date,sort_by_end_date)
-    if not hackathons:
-        raise HTTPException(status_code=404, detail="No Unstop hackathons found")
-    
-    return {"hackathons": hackathons,
+    try:
+
+     hackathons = await get_hackathons_by_platform(session, "Unstop", mode,sort_by_start_date,sort_by_end_date)
+
+     return {"hackathons": hackathons,
             "success": True,
             }
-    
+    except Exception as e:
+        raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error getting Unstop Hackathons : {e}"
+       )
 
-@router.get("/get-dorahacks")
+@router.get("/get-dorahacks",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
 async def get_dorahacks_hackathons(
     session: Session = Depends(get_session),
     mode: Optional[List[str]] = Query(None),
     sort_by_start_date : bool = Query(False, alias="start-date"),
     sort_by_end_date : bool = Query(False,alias="end-date")
 ):
-    hackathons = await get_hackathons_by_platform(session, "DoraHack", mode,sort_by_start_date,sort_by_end_date)
-    if not hackathons:
-        raise HTTPException(status_code=404, detail="No DoraHack hackathons found")
-    
-    return {"hackathons": hackathons,
+    try :
+
+     hackathons = await get_hackathons_by_platform(session, "DoraHack", mode,sort_by_start_date,sort_by_end_date)
+
+     return {"hackathons": hackathons,
             "success": True,
             }
     
+    except Exception as e:
+         raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error getting Dorahacks Hackathons : {e}"
+       )
+    
 
-@router.get("/search")
+@router.get("/search",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
 async def search_hackathons(
     session: Session = Depends(get_session),
     query: str = Query(...,alias="q")
  ):
-    hackathons = await get_hackathons_by_search(session, query)
-    if not hackathons:
-        return {"hackathons": [], 
-                "success": False}
-    
-    return {"hackathons": hackathons, 
+
+    try :
+
+        hackathons = await get_hackathons_by_search(session, query)
+        return {"hackathons": hackathons, 
             "success": True}
+    
+    except Exception as e:
+        raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error Searching Hackathons : {e}"
+       )
 
-
-@router.post("/bookmark/{hackathon_id}")
+@router.post("/bookmark/{hackathon_id}",status_code=status.HTTP_201_CREATED)
 async def bookmark_hackathon(
     hackathon_id: str,
     request: Request,
@@ -137,13 +169,45 @@ async def bookmark_hackathon(
     user = request.session.get("user")
     if not user:
         return RedirectResponse(url="auth/login")
+
+    try :
+         
+         user_sub = user.get("userinfo", {}).get("sub")
+
+         bookmark_entry = await get_bookmarky_entry(user_sub,hackathon_id,db_session)
+         
+         if bookmark_entry:
+          db_session.add(bookmark_entry)
+          db_session.commit()
+         return {"message": "Hackathon bookmarked successfully"}
     
-    user_sub = user.get("userinfo", {}).get("sub")
+    except Exception as e:
+        db_session.rollback()
 
-    bookmark_entry = await get_bookmarky_entry(user_sub,hackathon_id,db_session)
+        raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error bookmarking the Hackathon: {e}"
+       )
 
-    if bookmark_entry:
-        db_session.add(bookmark_entry)
+@router.get("/get-bookmarks/{user_sub}",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
+async def get_bookmarks(
+    user_sub : str,
+    request : Request,
+    db_session : Session = Depends(get_session)
+):
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse(url="/auth/login")
     
+    try:
+        hackathons = await get_bookmarked_hackathons(db_session,user_sub)
 
-    return {"message": "Hackathon bookmarked successfully"}
+        return {
+        "hackathons" : hackathons,
+        "success" : True
+    }
+    except Exception as e:
+        raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"Error getting the bookmarked the Hackathons: {e}"
+       )

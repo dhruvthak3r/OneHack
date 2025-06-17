@@ -25,9 +25,7 @@ class HackathonResultSchema(BaseModel):
     platform : Optional[str] = None
 
 
-class HackathonResponseSchema(BaseModel):
-    hackathons : List[HackathonResultSchema]
-    success : bool
-
 class HackathonListResponseSchema(BaseModel):
-    hackathons: List[HackathonResponseSchema]
+    hackathons: List[HackathonResultSchema]
+    success: bool
+
