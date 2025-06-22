@@ -25,8 +25,8 @@ class Hackathon(Base):
     __tablename__ = 'hackathon'
 
     Hackathon_id = Column(String(36), primary_key=True,autoincrement=False)
-    Hackathon_name = Column(String(200), nullable=False)
-    Hackathon_url = Column(String(200), nullable=False)
+    Hackathon_name = Column(String(200), nullable=True)
+    Hackathon_url = Column(String(200), nullable=True)
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True)
     reg_start_date = Column(Date, nullable=True)

@@ -14,8 +14,9 @@ push: null
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
-- prefect.deployments.steps.set_working_directory:
-    directory: C:\Users\Dhruv\Desktop\dhruvpy\OneHack
+- prefect.deployments.steps.git_clone:
+    repository: https://github.com/dhruvthak3r/OneHack
+    branch: main
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
@@ -36,13 +37,12 @@ deployments:
    unstop_data_filename: unstop_hackathons.json
    devpost_data_filename: devpost_hackathons.json
    dorahacks_data_filename: dorahacks_hackathons.json
-
   work_pool:
     name: onehack_worker
     work_queue_name: null
     job_variables: {}
   schedules:
   - interval: 300.0
-    anchor_date: '2025-06-02T13:20:09.770891+00:00'
+    anchor_date: '2025-06-22T12:01:35.253551+00:00'
     timezone: UTC
     active: true

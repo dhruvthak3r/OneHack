@@ -77,6 +77,6 @@ async def callback(
 
 
 @router.get("/logout")
-def logout(request: Request):
+async def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url="/")

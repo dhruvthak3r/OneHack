@@ -178,7 +178,6 @@ async def bookmark_hackathon(
          
          if bookmark_entry:
           db_session.add(bookmark_entry)
-          db_session.commit()
          return {"message": "Hackathon bookmarked successfully"}
     
     except Exception as e:
