@@ -6,7 +6,10 @@ from notifications.utils import get_connection
 def hackathon_worker(ch, method, properties, body):
     
 
-    print(f"received{body}")
+    print(f"received {body}")
+
+
+    
     ch.basic_ack(delivery_tag=method.delivery_tag)
     
 
@@ -16,11 +19,11 @@ if __name__ == '__main__':
         connection = get_connection()
         channel = connection.channel()
         print("connection is up")
-        channel.queue_declare(queue='hackathon-queue',durable=True)
-        channel.queue_bind(queue='hackathon-queue',exchange='hackathon',routing_key='hackathon-queue')
+        channel.queue_declare(queue='user-queue',durable=True)
+        channel.queue_bind(queue='user-queue',exchange='hackathon',routing_key='user-queue')
         print("binding done")
         channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(queue='hackathon-queue', on_message_callback=hackathon_worker)
+        channel.basic_consume(queue='user-queue', on_message_callback=hackathon_worker)
 
         print("did it call??")
 
@@ -33,3 +36,6 @@ if __name__ == '__main__':
             sys.exit(0)
         except SystemExit:
             os._exit(0)
+
+
+

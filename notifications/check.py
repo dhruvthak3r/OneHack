@@ -1,37 +1,54 @@
-from prefect import flow
+from prefect import flow,task
 
-from sqlalchemy import select, func, cast, Date
+from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from datetime import date, timedelta
 
-from database.tables import Hackathon
+from database.tables import Hackathon,Bookmarks
 
-from fastapi import Depends
 
 from database.db import connect_to_db
-from database.tables import Base
 
 from notifications.send import enqueue_hackathons
 
-@flow
-def orchestrate_find_upcoming_hackathons(session):
-    query = select(Hackathon).where(Hackathon.reg_start_date.between(date.today(),date.today() + timedelta(days=30)))
 
-    result = session.scalars(query).all()
+def orchestrate_enqueue_hackathons(session):
+   query = select(Hackathon).where(Hackathon.reg_start_date.between(date.today(),date.today() + timedelta(days=30)))
 
-    for hackathon in result:
-       enqueue_hackathons(hackathon.Hackathon_id)
+   upcoming_hackathons = session.scalars(query).all()
+
+
+   for hackathon in upcoming_hackathons:
+      
+      users = (select(Bookmarks).where(Bookmarks.hackathon_id == hackathon.Hackathon_id))
+
+      result = session.scalars(users).all()
+
+      for users in result:
+         payload = {
+         "user_id" : users.user_sub ,
+          "hackathon_id" : hackathon.Hackathon_id
+          }
+         
+         enqueue_hackathons(payload)
        
 
 
 
+def orchestrate_find_upcoming_hackathons():
 
-if __name__ == '__main__':
     engine = connect_to_db()
     #Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 
     with Session.begin() as session:
-     orchestrate_find_upcoming_hackathons(session)
+       
+     orchestrate_enqueue_hackathons(session)
+       
+
+
+if __name__ == '__main__':
+    
+    orchestrate_find_upcoming_hackathons()
 
