@@ -14,7 +14,7 @@ from notifications.send import enqueue_hackathons
 
 
 def orchestrate_enqueue_hackathons(session):
-   query = select(Hackathon).where(Hackathon.reg_start_date.between(date.today(),date.today() + timedelta(days=30)))
+   query = select(Hackathon).where(Hackathon.reg_end_date.between(date.today(),date.today() + timedelta(days=30)))
 
    upcoming_hackathons = session.scalars(query).all()
 
