@@ -4,6 +4,7 @@ import json
 
 from notifications.utils import get_connection,get_brevo_headers,get_brevo_payload
 from notifications.email_templates import generate_email_template
+from notifications.send import enqueue_emails
 
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
@@ -51,6 +52,7 @@ def hackathon_worker(ch, method, properties, body):
             reg_end_date if reg_end_date is not None else "",
             url if url is not None else ""
         )
+      enqueue_emails(email)
       
 
       sender_email = os.getenv('brevo_sender_email')

@@ -23,18 +23,14 @@ def orchestrate_enqueue_hackathons(session):
       
       users = (select(Bookmarks.user_sub,Bookmarks.hackathon_id).where(Bookmarks.hackathon_id == hackathon.Hackathon_id))
 
-      result = session.execute(users).first()
+      result = session.execute(users).fetchall()
 
-      if result:
-         user_sub,hackathon_id = result
-      else :
-         user_sub,hackathon_id = None,None
-         
-      payload = {
-         "user_sub" : user_sub,
-         "hackathon_id" : hackathon_id
-      }
-      enqueue_hackathons(payload)
+      for user_entry in result:
+        payload = {
+         "user_sub" : user_entry.user_sub,
+         "hackathon_id" : user_entry.hackathon_id
+       }
+        enqueue_hackathons(payload)
        
 
 
