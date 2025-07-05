@@ -29,7 +29,10 @@ if __name__ == '__main__':
        
         connection = get_connection()
         channel = connection.channel()
+
    
+        channel.exchange_declare(exchange='send', exchange_type='direct')
+        
         channel.queue_declare(queue='send-queue',durable=True)
         channel.queue_bind(queue='send-queue',exchange='send',routing_key='send-queue')
         

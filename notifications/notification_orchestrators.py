@@ -10,7 +10,7 @@ from database.tables import Hackathon,Bookmarks
 
 from database.db import connect_to_db
 
-from notifications.send import enqueue_hackathons
+from notifications.senders.send_hackathons import enqueue_hackathons
 
 
 def orchestrate_enqueue_hackathons(session):

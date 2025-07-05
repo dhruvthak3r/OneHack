@@ -4,7 +4,7 @@ import json
 
 from notifications.utils import get_connection,get_brevo_headers,get_brevo_payload
 from notifications.email_templates import generate_email_template
-from notifications.send import enqueue_emails
+from notifications.senders.send_emails import enqueue_emails
 
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
@@ -52,31 +52,21 @@ def hackathon_worker(ch, method, properties, body):
             reg_end_date if reg_end_date is not None else "",
             url if url is not None else ""
         )
-      enqueue_emails(email)
-      
-
-      sender_email = os.getenv('brevo_sender_email')
       to_email = email
-      
-
-      payload = get_brevo_payload(sender_email,to_email,name,email_html_template)
-
-      headers = get_brevo_headers()
-
-      response = requests.post("https://api.brevo.com/v3/smtp/email", json=payload, headers=headers)
-      print("Status:", response.status_code)
-      print("Response:", response.json())
+      enqueue_emails(email_html_template, name,to_email)
           
           
     
     ch.basic_ack(delivery_tag=method.delivery_tag)
-    
+
 
 if __name__ == '__main__':
     try:
        
         connection = get_connection()
         channel = connection.channel()
+
+        channel.exchange_declare(exchange='hackathon', exchange_type='direct')
    
         channel.queue_declare(queue='user-queue',durable=True)
         channel.queue_bind(queue='user-queue',exchange='hackathon',routing_key='user-queue')
@@ -95,6 +85,3 @@ if __name__ == '__main__':
             sys.exit(0)
         except SystemExit:
             os._exit(0)
-
-
-
