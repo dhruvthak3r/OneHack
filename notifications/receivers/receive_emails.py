@@ -2,7 +2,20 @@ import os,sys
 import requests
 import json
 from notifications.utils import get_connection,get_brevo_headers,get_brevo_payload
-def send_queue_worker(ch, method, properties, body):
+
+from ratelimit import limits, sleep_and_retry
+
+
+async def send_brevo_email(to_email, sender_email, name, email_html_template):
+    payload = get_brevo_payload(sender_email, to_email, name, email_html_template)
+    headers = get_brevo_headers()
+
+    response = requests.post("https://api.brevo.com/v3/smtp/email", json=payload, headers=headers)
+    if response.status_code != 201:
+        raise Exception(f"Failed to send email: {response.status_code} - {response.text}")
+    
+
+async def send_queue_worker(ch, method, properties, body):
     
 
     data = json.loads(body.decode())
@@ -13,14 +26,8 @@ def send_queue_worker(ch, method, properties, body):
       
     sender_email = os.getenv('brevo_sender_email')
 
-    payload = get_brevo_payload(sender_email,to_email,name,email_html_template)
-
-    headers = get_brevo_headers()
-
-    response = requests.post("https://api.brevo.com/v3/smtp/email", json=payload, headers=headers)
-    print("Status:", response.status_code)
-    print("Response:", response.json())
-          
+    
+    await send_brevo_email(to_email,sender_email,name, email_html_template)
           
     
     ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -32,7 +39,7 @@ if __name__ == '__main__':
 
    
         channel.exchange_declare(exchange='send', exchange_type='direct')
-        
+
         channel.queue_declare(queue='send-queue',durable=True)
         channel.queue_bind(queue='send-queue',exchange='send',routing_key='send-queue')
         
