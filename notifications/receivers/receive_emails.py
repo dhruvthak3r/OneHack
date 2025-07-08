@@ -6,7 +6,7 @@ from notifications.utils import get_connection,get_brevo_headers,get_brevo_paylo
 from ratelimit import limits, sleep_and_retry
 
 
-async def send_brevo_email(to_email, sender_email, name, email_html_template):
+def send_brevo_email(to_email, sender_email, name, email_html_template):
     payload = get_brevo_payload(sender_email, to_email, name, email_html_template)
     headers = get_brevo_headers()
 
@@ -15,7 +15,7 @@ async def send_brevo_email(to_email, sender_email, name, email_html_template):
         raise Exception(f"Failed to send email: {response.status_code} - {response.text}")
     
 
-async def send_queue_worker(ch, method, properties, body):
+def send_queue_worker(ch, method, properties, body):
     
 
     data = json.loads(body.decode())
@@ -27,7 +27,7 @@ async def send_queue_worker(ch, method, properties, body):
     sender_email = os.getenv('brevo_sender_email')
 
     
-    await send_brevo_email(to_email,sender_email,name, email_html_template)
+    send_brevo_email(to_email,sender_email,name, email_html_template)
           
     
     ch.basic_ack(delivery_tag=method.delivery_tag)
