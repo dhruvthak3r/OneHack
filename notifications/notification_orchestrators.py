@@ -12,7 +12,7 @@ from database.db import connect_to_db
 
 from notifications.senders.send_hackathons import enqueue_hackathons
 
-
+@task(name="enqueue_hackathons")
 def orchestrate_enqueue_hackathons(session):
    query = select(Hackathon).where(Hackathon.reg_end_date.between(date.today(),date.today() + timedelta(days=30)))
 
@@ -34,7 +34,7 @@ def orchestrate_enqueue_hackathons(session):
        
 
 
-
+@flow(name="orchestrate_find_upcoming_hackathons")
 def orchestrate_find_upcoming_hackathons():
 
     engine = connect_to_db()

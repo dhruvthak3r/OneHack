@@ -112,6 +112,17 @@ async def get_bookmarked_hackathons(session: Session, user_sub: str):
 
     return hackathons
 
+async def get_hackathon_by_id(
+    session: Session,
+    hackathon_id: str
+):
+     hackathon_info = result = session.query(
+                              Hackathon.Hackathon_name,
+                              Hackathon.start_date,
+                              Hackathon.end_date,
+                              Hackathon.mode
+                              ).filter(Hackathon.Hackathon_id == hackathon_id).first()
+     return hackathon_info
 
 
 async def get_user_info(user,session):

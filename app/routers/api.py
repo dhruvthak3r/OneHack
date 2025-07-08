@@ -7,7 +7,10 @@ from typing import Optional,List
 
 from sqlalchemy.orm import Session
 
-from app.utils import get_hackathons_by_platform,get_session,get_hackathons_by_search,get_bookmarky_entry,get_bookmarked_hackathons
+from app.utils import get_hackathons_by_platform,get_session,get_hackathons_by_search,get_bookmarky_entry,get_bookmarked_hackathons,get_hackathon_by_id
+
+from urllib.parse import quote_plus
+
 
 router = APIRouter()
 
@@ -210,3 +213,33 @@ async def get_bookmarks(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         detail=f"Error getting the bookmarked the Hackathons: {e}"
        )
+
+@router.get("/add-to-calendar/{hackathon_id}", status_code=status.HTTP_200_OK)
+async def add_to_calendar(hackathon_id:str,db_session : Session = Depends(get_session)):
+    
+    hackathon_info = await get_hackathon_by_id(db_session, hackathon_id)
+
+    if hackathon_info is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Hackathon with id {hackathon_id} not found"
+        )
+    
+    title = quote_plus(hackathon_info.Hackathon_name)
+    location = quote_plus(hackathon_info.mode)
+
+    description = quote_plus(f"Join the hackathon {hackathon_info.Hackathon_name} on {hackathon_info.start_date} to {hackathon_info.end_date}. Mode: {hackathon_info.mode}")
+
+    start_str = hackathon_info.start_date.strftime('%Y%m%dT%H%M%SZ')
+    end_str = hackathon_info.end_date.strftime('%Y%m%dT%H%M%SZ')
+
+    google_calendar_url = (
+        f"https://calendar.google.com/calendar/u/0/r/eventedit"
+        f"?text={title}"
+        f"&dates={start_str}/{end_str}"
+        f"&details={description}"
+        f"&location={location}"
+        f"&sf=true&output=xml"
+    )
+
+    return RedirectResponse(url=google_calendar_url, status_code=302)
