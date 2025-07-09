@@ -24,16 +24,6 @@ async def root(request: Request):
     if not user:
         return RedirectResponse(url="/auth/login")
     
-    #user_info = {
-        #"sub": user.get("userinfo", {}).get("sub"),
-        #"name": user.get("userinfo", {}).get("name"),
-        #"email": user.get("userinfo", {}).get("email"),
-        #"picture": user.get("userinfo", {}).get("picture"),
-        #"sub": user.get("userinfo", {}).get("sub"),
-        #"nickname": user.get("userinfo", {}).get("nickname"),
-        #"name": user.get("userinfo", {}).get("name"),
-    #}
-    
     return {"message": "Welcome to the home page!", "user": user}
 
 

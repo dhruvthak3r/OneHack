@@ -19,16 +19,16 @@ def get_hackathon_entry(entry : dict, platform_id:int,session):
     """
     Returns a Hackathon object with the given entry data.
     """
-    if(session.scalar(select(func.count()).select_from(Hackathon).where(Hackathon.Hackathon_name == entry.get("name"))))  == 0:
+    if(session.scalar(select(func.count()).select_from(Hackathon).where(Hackathon.Hackathon_name == entry.get("title"))))  == 0:
      
      return Hackathon(
         Hackathon_id = generate_uuid(),
-        Hackathon_name = entry.get("name"),
-        Hackathon_url = entry.get("link"),
-        start_date = convert_date_string_to_date_object(entry.get("starts_at")),
-        end_date = convert_date_string_to_date_object(entry.get("ends_at")),
-        reg_start_date = convert_date_string_to_date_object(entry.get("reg_starts_at")),
-        reg_end_date = convert_date_string_to_date_object(entry.get("reg_ends_at")),
+        Hackathon_name = entry.get("title"),
+        Hackathon_url = entry.get("url"),
+        start_date = convert_date_string_to_date_object(entry.get("start_date")),
+        end_date = convert_date_string_to_date_object(entry.get("end_date")),
+        reg_start_date = convert_date_string_to_date_object(entry.get("reg_start_date")),
+        reg_end_date = convert_date_string_to_date_object(entry.get("reg_end_date")),
         mode = entry.get("mode"),
         platform_id = platform_id
      )
