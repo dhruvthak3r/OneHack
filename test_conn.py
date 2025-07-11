@@ -12,7 +12,10 @@ def connect_to_db():
             echo=True
         )
         engine.connect()
+        print("Database connection established successfully.")
         
         return engine
     except Exception as e:
         print(f"Error connecting to the database: {e}")
+
+connect_to_db()

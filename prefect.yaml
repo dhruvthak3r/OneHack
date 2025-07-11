@@ -25,7 +25,7 @@ deployments:
   tags: []
   concurrency_limit: null
   description: null
-  entrypoint: orchestrators\orchestrate_pipeline.py:orchestrate_extractors_transformers_and_loaders
+  entrypoint: orchestrators/orchestrate_pipeline.py:orchestrate_extractors_transformers_and_loaders
   parameters:
    devfolio_url: https://devfolio.co/hackathons/open
    unstop_base_url: https://unstop.com/api/public/opportunity/search-result?opportunity=hackathons&per_page=15&oppstatus=open&quickApply=false&distance=50&page={}
@@ -38,11 +38,11 @@ deployments:
    devpost_data_filename: devpost_hackathons.json
    dorahacks_data_filename: dorahacks_hackathons.json
   work_pool:
-    name: onehack_worker
+    name: onehack_pool
     work_queue_name: null
     job_variables: {}
   schedules:
-  - interval: 300.0
-    anchor_date: '2025-06-22T12:01:35.253551+00:00'
+  - interval: 3600.0
+    anchor_date: '2025-07-11T14:15:00.114109+00:00'
     timezone: UTC
     active: true
