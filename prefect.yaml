@@ -42,7 +42,7 @@ deployments:
     work_queue_name: null
     job_variables: {}
   schedules:
-  - interval: 3600.0
+  - interval: 86400.0
     anchor_date: '2025-07-11T14:15:00.114109+00:00'
     timezone: UTC
     active: true
