@@ -1,14 +1,20 @@
 from sqlalchemy import create_engine
 
+from dotenv import load_dotenv
+load_dotenv()
 
+import os
 def connect_to_db():
     """
     Connects to the MySQL database using SQLAlchemy.
     Returns the engine object.
     """
     try:
+        db_url = os.getenv('aws_rds_url')
+        if db_url is None:
+            raise ValueError("Environment variable 'aws_rds_url' is not set.")
         engine = create_engine(
-            'mysql+pymysql://admin:Dhruvvurhd777@onehack-1.cdumuk2o669e.ap-south-1.rds.amazonaws.com:3306/onehack', 
+            db_url, 
             echo=True
         )
         engine.connect()

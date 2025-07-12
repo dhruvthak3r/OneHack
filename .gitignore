@@ -1,5 +1,6 @@
 .env
 test.py
+test_conn.py
 
 # Ignore hackathon data files
 devfolio_hackathons.json
