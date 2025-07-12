@@ -2,7 +2,7 @@ from fastapi import FastAPI,Request
 from fastapi.responses import RedirectResponse
 import uvicorn
 
-from routers import auth, api
+from app.routers import auth, api
 
 from starlette.middleware.sessions import SessionMiddleware
 
