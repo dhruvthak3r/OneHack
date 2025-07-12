@@ -20,5 +20,6 @@ def connect_to_db():
         engine.connect()
         
         return engine
+    
     except Exception as e:
         print(f"Error connecting to the database: {e}")
