@@ -8,7 +8,7 @@ load_dotenv()
 brevo_api_key = os.getenv('brevo_api_key')
 
 def get_connection():
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
     return connection
 
 

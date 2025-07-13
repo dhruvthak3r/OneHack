@@ -1,7 +1,7 @@
 from utils import read_json_file
 from prefect import flow
 
-from database.db import connect_to_db
+from database.db import get_db_connection_for_prefect
 from database.tables import Base
 
 from sqlalchemy.orm import sessionmaker
@@ -15,7 +15,7 @@ from orchestrators.loaders_tasks import orchestrate_load_devfolio,orchestrate_lo
 def orchestrate_extractors_transformers_and_loaders(devfolio_url, unstop_base_url, devpost_base_url, dorahacks_ongoing_url, dorahacks_upcoming_url, devfolio_data_filename, unstop_data_filename, devpost_data_filename, dorahacks_data_filename
 ):
 
-    engine = connect_to_db()
+    engine = get_db_connection_for_prefect()
     if engine is not None:
         Base.metadata.create_all(engine)
     else:
@@ -43,6 +43,7 @@ def orchestrate_extractors_transformers_and_loaders(devfolio_url, unstop_base_ur
      orchestrate_load_dorahack(dorahacks_entries,session)
      session.commit()
 
+
 if __name__ == "__main__":
    devfolio_url =  'https://devfolio.co/hackathons/open'
    unstop_base_url =  'https://unstop.com/api/public/opportunity/search-result?opportunity=hackathons&per_page=15&oppstatus=open&quickApply=false&distance=50&page={}'
@@ -55,5 +56,5 @@ if __name__ == "__main__":
    devpost_data_filename =  'devpost_hackathons.json'
    dorahacks_data_filename = 'dorahacks_hackathons.json'
 
-   orchestrate_extractors_transformers_and_loaders(devfolio_url, unstop_base_url, devpost_base_url, dorahacks_ongoing_url, dorahacks_upcoming_url, devfolio_data_filename, unstop_data_filename, devpost_data_filename, dorahacks_data_filename)
+   (orchestrate_extractors_transformers_and_loaders(devfolio_url, unstop_base_url, devpost_base_url, dorahacks_ongoing_url, dorahacks_upcoming_url, devfolio_data_filename, unstop_data_filename, devpost_data_filename, dorahacks_data_filename))
 

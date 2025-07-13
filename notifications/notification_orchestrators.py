@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from database.tables import Hackathon,Bookmarks
 
 
-from database.db import connect_to_db
+from database.db import get_db_connection_for_prefect
 
 from notifications.senders.send_hackathons import enqueue_hackathons
 
@@ -37,7 +37,7 @@ def orchestrate_enqueue_hackathons(session):
 @flow(name="orchestrate_find_upcoming_hackathons")
 def orchestrate_find_upcoming_hackathons():
 
-    engine = connect_to_db()
+    engine = get_db_connection_for_prefect()
     #Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 
@@ -47,7 +47,9 @@ def orchestrate_find_upcoming_hackathons():
        
 
 
+
+
 if __name__ == '__main__':
     
-    orchestrate_find_upcoming_hackathons()
+  (orchestrate_find_upcoming_hackathons())
 
