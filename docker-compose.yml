@@ -12,7 +12,7 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     
   backend:
-     image: onehack-backend:latest
+     image: dhruvthak3r/onehack-backend:latest
      container_name: onehack-backend
      ports:
         - "8080:8080"
