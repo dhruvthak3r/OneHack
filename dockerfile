@@ -10,4 +10,10 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+COPY start.sh .
+
+RUN chmod +x start.sh
+
+CMD ["./start.sh"]
+
+

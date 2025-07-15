@@ -1,4 +1,5 @@
 from prefect import flow,task
+from prefect.cache_policies import NO_CACHE
 
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
@@ -12,7 +13,7 @@ from database.db import get_db_connection_for_prefect
 
 from notifications.senders.send_hackathons import enqueue_hackathons
 
-@task(name="enqueue_hackathons")
+@task(name="enqueue_hackathons",cache_policy=NO_CACHE)
 def orchestrate_enqueue_hackathons(session):
    query = select(Hackathon).where(Hackathon.reg_end_date.between(date.today(),date.today() + timedelta(days=30)))
 

@@ -14,6 +14,8 @@ secret = Secret.load("aws-ec2-domain")
 assert isinstance(secret, Secret)
 rabbitmq_url = secret.get()
 
+print("RabbitMQ URL:", rabbitmq_url)
+
 
 def get_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_url,port=5672))
