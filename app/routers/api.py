@@ -132,7 +132,7 @@ async def get_dorahacks_hackathons(
 ):
     try :
 
-     hackathons = await get_hackathons_by_platform(session, "DoraHack", mode,sort_by_start_date,sort_by_end_date)
+     hackathons = await get_hackathons_by_platform(session, "DoraHacks", mode,sort_by_start_date,sort_by_end_date)
 
      return {"hackathons": hackathons,
             "success": True,
