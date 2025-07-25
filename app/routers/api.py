@@ -171,8 +171,8 @@ async def bookmark_hackathon(
 ):
     user = request.session.get("user")
     if not user:
-        return RedirectResponse(url="/auth/login")
-
+        return RedirectResponse(url="/auth/login",status_code=303)
+       
     try :
          
          user_sub = user.get("userinfo", {}).get("sub")
