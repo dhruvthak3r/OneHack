@@ -1,10 +1,8 @@
-from fastapi import FastAPI,Request
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI
 import uvicorn
 
-from app.routers import auth, api
+from app.routers import api
 
-from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.utils import lifespan
@@ -20,21 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(api.router, prefix="/api", tags=["api"])
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key='zbFPHiEhqWYrH4wiz5NwbZDa49MV9OlYxJf2yRzdxemFhkRmzpWOVwUaCwHnMoQSiYUMDh9ueKjtai_vQbI0Zg',
-)
+
 
 @app.get("/")
-async def root(request: Request):
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse(url="/auth/login")
+async def root():
     
-    return {"message": "Welcome to the home page!", "user": user}
+    return {"message": "Welcome to the home page!"}
 
 
 if __name__ == "__main__":

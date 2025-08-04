@@ -11,6 +11,8 @@ from sqlalchemy import select, join
 
 from contextlib import asynccontextmanager
 
+import requests
+
 
 async def get_hackathons_by_platform(
     session: Session,
@@ -146,15 +148,53 @@ async def get_bookmarky_entry(user_sub,hackathon_id,session):
     else :
         return None
     
+async def fetch_existing_bookmark(user_sub: str, hackathon_id: str, session: Session):
+    return session.query(Bookmarks).filter(
+        Bookmarks.user_sub == user_sub,
+        Bookmarks.hackathon_id == hackathon_id
+    ).first()
+
+
+async def get_user_entry(user_sub,user_name,user_email,user_picture,session):
+    if session.query(Users).filter(Users.sub == user_sub).first() is None:
+        return Users(
+            sub=user_sub,
+            name=user_name,
+            email= user_email,
+            picture=user_picture
+        )
+    return None
+    
+
+def fetch_userinfo(access_token: str) -> dict:
+    url = "https://dev-b8uv1i5k42wqw5ej.us.auth0.com/userinfo"
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+
+    data = response.json()
+    return {
+        "sub": data.get("sub"),
+        "name": data.get("name"),
+        "email": data.get("email"),
+        "picture": data.get("picture"),
+    }
 
 @asynccontextmanager
 async def lifespan(app : FastAPI):
     engine = connect_to_db()
-    Base.metadata.create_all(engine)
-    app.state.Session = sessionmaker(bind=engine)
+    if engine is not None:
+        Base.metadata.create_all(engine)
+        app.state.Session = sessionmaker(bind=engine)
+    else:
+        app.state.Session = None
     
     yield
-    engine.dispose()
+    if engine is not None:
+        engine.dispose()
 
 
 async def get_session(request : Request):

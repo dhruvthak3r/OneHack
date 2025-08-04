@@ -1,13 +1,16 @@
 from fastapi import Query,Depends,HTTPException,APIRouter,Request,status
 from fastapi.responses import RedirectResponse
 
+import jwt
+
 from models.schemas import HackathonListResponseSchema
 
 from typing import Optional,List
 
 from sqlalchemy.orm import Session
 
-from app.utils import get_hackathons_by_platform,get_session,get_hackathons_by_search,get_bookmarky_entry,get_bookmarked_hackathons,get_hackathon_by_id
+from app.utils import get_hackathons_by_platform,get_session,get_hackathons_by_search,get_bookmarky_entry,get_bookmarked_hackathons,get_hackathon_by_id,get_user_entry,fetch_existing_bookmark,fetch_userinfo
+from app.routers.auth import verify_jwt_token
 
 from urllib.parse import quote_plus
 
@@ -169,13 +172,26 @@ async def bookmark_hackathon(
     request: Request,
     db_session: Session = Depends(get_session),
 ):
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse(url="/auth/login",status_code=303)
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
+    
+    token = auth_header.split(" ")[1]
        
     try :
+         user_info = fetch_userinfo(token)
+         user_sub = user_info.get("sub")
+         user_name = user_info.get("name")
+         user_email = user_info.get("email")
+         user_picture = user_info.get("picture")
+
+
+         if not user_sub:
+            raise HTTPException(status_code=400, detail="User ID not found in token")
          
-         user_sub = user.get("userinfo", {}).get("sub")
+         user_entry = await get_user_entry(user_sub,user_name,user_email,user_picture, db_session)
+         if user_entry:
+            db_session.add(user_entry)
 
          bookmark_entry = await get_bookmarky_entry(user_sub,hackathon_id,db_session)
          
@@ -183,6 +199,10 @@ async def bookmark_hackathon(
           db_session.add(bookmark_entry)
          return {"message": "Hackathon bookmarked successfully"}
     
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.PyJWTError as e:
+        raise HTTPException(status_code=401, detail=f"Token invalid: {str(e)}")
     except Exception as e:
         db_session.rollback()
 
@@ -190,6 +210,47 @@ async def bookmark_hackathon(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         detail=f"Error bookmarking the Hackathon: {e}"
        )
+    
+
+@router.delete("/bookmark/{hackathon_id}", status_code=status.HTTP_200_OK)
+async def delete_bookmark(
+    hackathon_id: str,
+    request: Request,
+    db_session: Session = Depends(get_session),
+):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        user_info = fetch_userinfo(token)
+        user_sub = user_info.get("sub")
+        
+
+        if not user_sub:
+            raise HTTPException(status_code=400, detail="User ID not found in token")
+
+        bookmark = await fetch_existing_bookmark(user_sub, hackathon_id, db_session)
+        if not bookmark:
+            raise HTTPException(status_code=404, detail="Bookmark not found")
+
+        db_session.delete(bookmark)
+
+        return {"message": "Bookmark deleted successfully"}
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.PyJWTError as e:
+        raise HTTPException(status_code=401, detail=f"Token invalid: {str(e)}")
+    except Exception as e:
+        db_session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting the bookmark: {e}"
+        )
+
 
 @router.get("/get-bookmarks/{user_sub}",response_model=HackathonListResponseSchema,status_code=status.HTTP_200_OK)
 async def get_bookmarks(
@@ -197,17 +258,29 @@ async def get_bookmarks(
     request : Request,
     db_session : Session = Depends(get_session)
 ):
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse(url="/auth/login")
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
+    
+    token = auth_header.split(" ")[1]
     
     try:
-        hackathons = await get_bookmarked_hackathons(db_session,user_sub)
+        user_info = fetch_userinfo(token)
+        if user_info is not None and user_info.get("sub") is not None:
+            user_sub = str(user_info.get("sub"))
+        else:
+            raise HTTPException(status_code=400, detail="User ID not found in token")
+
+        hackathons = await get_bookmarked_hackathons(db_session, user_sub)
 
         return {
         "hackathons" : hackathons,
         "success" : True
     }
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.PyJWTError as e:
+        raise HTTPException(status_code=401, detail=f"Token invalid: {str(e)}")
     except Exception as e:
         raise HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
