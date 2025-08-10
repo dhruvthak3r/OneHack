@@ -1,14 +1,14 @@
 import pika
 
 from prefect import task
-from notifications.utils import get_connection
+from notifications.utils import get_connection_for_prefect
 
 import json
 
 
 
 def enqueue_emails(email_html_template,name,to_email):
-    connection = get_connection()
+    connection = get_connection_for_prefect()
     if connection is None:
         raise RuntimeError("Failed to establish a connection. get_connection() returned None.")
         

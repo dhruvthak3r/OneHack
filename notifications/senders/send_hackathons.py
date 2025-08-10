@@ -1,14 +1,14 @@
 import pika
 
 from prefect import task
-from notifications.utils import get_connection
+from notifications.utils import get_connection_for_prefect
 
 from prefect.blocks.system import Secret
 
 import json
 
 def enqueue_hackathons(payload):
-    connection = get_connection()
+    connection = get_connection_for_prefect()
     if connection is None:
         raise RuntimeError("get_connection() returned None. Ensure it returns a valid pika.BlockingConnection object.")
     channel = connection.channel()
