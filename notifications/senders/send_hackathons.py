@@ -7,6 +7,8 @@ import json
 
 def enqueue_hackathons(payload):
     connection = get_connection()
+    if connection is None:
+        raise RuntimeError("get_connection() returned None. Ensure it returns a valid pika.BlockingConnection object.")
     channel = connection.channel()
 
     channel.queue_declare(queue="user-queue",durable=True)

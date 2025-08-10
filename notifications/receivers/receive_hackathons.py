@@ -64,6 +64,8 @@ if __name__ == '__main__':
     try:
        
         connection = get_connection()
+        if connection is None:
+            raise RuntimeError("Failed to establish a connection. get_connection() returned None.")
         channel = connection.channel()
 
         channel.exchange_declare(exchange='hackathon', exchange_type='direct')

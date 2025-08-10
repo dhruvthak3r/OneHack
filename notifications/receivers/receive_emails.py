@@ -4,6 +4,9 @@ import json
 from notifications.utils import get_connection,get_brevo_headers,get_brevo_payload
 
 from ratelimit import limits, sleep_and_retry
+from dotenv import load_dotenv
+load_dotenv()
+
 
 @sleep_and_retry
 @limits(calls=1, period=1) # Limit to 10 calls per minute

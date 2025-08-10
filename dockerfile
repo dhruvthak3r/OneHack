@@ -9,7 +9,7 @@ COPY start.sh .
 RUN chmod +x start.sh
 
 COPY . .
-
+COPY .env .env
 ENV PYTHONPATH=/app
 
 CMD ["sh", "./start.sh"]
