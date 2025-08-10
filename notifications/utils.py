@@ -26,6 +26,7 @@ def get_connection_for_prefect():
  assert isinstance(secret, Secret)
  rabbitmq_url_for_prefect = secret.get()
  params = pika.URLParameters(rabbitmq_url_for_prefect)
+ params.heartbeat = 600
  connection = pika.BlockingConnection(params)
  return connection
 
