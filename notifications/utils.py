@@ -12,10 +12,6 @@ brevo_api_key = os.getenv('brevo_api_key')
 
 rabbitmq_url = os.getenv('aws-ec2-domain')
 
-secret = Secret.load("aws-ec2-domain")
-assert isinstance(secret, Secret)
-rabbitmq_url_for_prefect = secret.get()
-
 
 def get_connection():
     connection = None
@@ -24,9 +20,9 @@ def get_connection():
     return connection
 
 def get_connection_for_prefect():
- RABBITMQ_USER = "guest" 
- RABBITMQ_PASS = "guest" 
- print("rabbitmq_url_for_prefect:", rabbitmq_url_for_prefect)
+ secret = Secret.load("aws-ec2-domain")
+ assert isinstance(secret, Secret)
+ rabbitmq_url_for_prefect = secret.get()
  params = pika.URLParameters(rabbitmq_url_for_prefect)
  connection = pika.BlockingConnection(params)
  return connection
