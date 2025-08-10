@@ -16,7 +16,8 @@ rabbitmq_url = os.getenv('aws-ec2-domain')
 def get_connection():
     connection = None
     if rabbitmq_url:
-     connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_url,port=5672))
+      params = pika.URLParameters(rabbitmq_url)
+      connection = pika.BlockingConnection(params)
     return connection
 
 def get_connection_for_prefect():
