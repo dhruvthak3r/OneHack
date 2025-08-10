@@ -15,6 +15,7 @@ rabbitmq_url = os.getenv('aws-ec2-domain')
 
 def get_connection():
     connection = None
+    print(f"rabbitmq_url: {rabbitmq_url}")
     if rabbitmq_url:
       params = pika.URLParameters(rabbitmq_url)
       connection = pika.BlockingConnection(params)
