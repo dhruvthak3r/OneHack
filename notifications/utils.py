@@ -20,12 +20,13 @@ rabbitmq_url_for_prefect = secret.get()
 def get_connection():
     connection = None
     if rabbitmq_url:
-     connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_url,port=5672))
+     params = pika.URLParameters(rabbitmq_url)
+     connection = pika.BlockingConnection(params)
     return connection
 
 def get_connection_for_prefect():
- 
- connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_url_for_prefect,port=5672))
+ params = pika.URLParameters(rabbitmq_url_for_prefect)
+ connection = pika.BlockingConnection(params)
  return connection
 
 
