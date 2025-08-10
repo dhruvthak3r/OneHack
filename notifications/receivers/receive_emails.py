@@ -36,6 +36,8 @@ if __name__ == '__main__':
     try:
        
         connection = get_connection()
+        if connection is None:
+            raise Exception("Failed to establish connection: get_connection() returned None")
         channel = connection.channel()
 
    
