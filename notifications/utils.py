@@ -3,6 +3,8 @@ import pika
 import os 
 from dotenv import load_dotenv
 
+from prefect.blocks.system import Secret
+
 load_dotenv()
 
 brevo_api_key = os.getenv('brevo_api_key')
@@ -10,7 +12,9 @@ brevo_api_key = os.getenv('brevo_api_key')
 
 rabbitmq_url = os.getenv('aws-ec2-domain')
 
-print("RabbitMQ URL:", rabbitmq_url)
+secret = Secret.load("aws-rds-url")
+assert isinstance(secret, Secret)
+rabbitmq_url_for_prefect = secret.get()
 
 
 def get_connection():
@@ -18,6 +22,11 @@ def get_connection():
     if rabbitmq_url:
      connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_url,port=5672))
     return connection
+
+def get_connection_for_prefect():
+ 
+ connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_url_for_prefect,port=5672))
+ return connection
 
 
 def get_brevo_headers():
