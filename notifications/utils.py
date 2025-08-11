@@ -10,7 +10,7 @@ load_dotenv()
 brevo_api_key = os.getenv('brevo_api_key')
 
 sender_email = os.getenv('brevo_sender_email')
-rabbitmq_url = os.getenv('aws-ec2-domain')
+rabbitmq_url = os.getenv('rabbitmq_url')
 
 
 def get_connection():
@@ -28,7 +28,7 @@ def get_connection_for_prefect():
         assert isinstance(secret, Secret)
         rabbitmq_url_for_prefect = secret.get()
     except Exception as e:
-        rabbitmq_url_for_prefect = os.getenv('aws-ec2-domain')
+        rabbitmq_url_for_prefect = os.getenv('rabbitmq_url')
 
     if not rabbitmq_url_for_prefect:
         raise RuntimeError("RabbitMQ URL not found in Prefect secret or environment variable.")
