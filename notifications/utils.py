@@ -24,6 +24,7 @@ def get_connection():
             try:
                 connection = pika.BlockingConnection(params)
                 print("Connected to RabbitMQ!")
+                return connection
             except AMQPConnectionError:
                 print(f"RabbitMQ not ready yet, retrying in 3s... (attempt {attempt+1})")
                 time.sleep(3)
@@ -49,6 +50,8 @@ def get_connection_for_prefect():
      for attempt in range(10): 
          try:
              connection = pika.BlockingConnection(params)
+             print("Connected to RabbitMQ!")
+             return connection
          except AMQPConnectionError:
              print(f"RabbitMQ not ready yet, retrying in 3s... (attempt {attempt+1})")
              time.sleep(3)
