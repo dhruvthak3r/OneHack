@@ -37,25 +37,25 @@ def get_connection_for_prefect():
         secret = Secret.load("aws-ec2-domain")
         assert isinstance(secret, Secret)
         rabbitmq_url_for_prefect = secret.get()
-    except Exception as e:
+    except Exception:
         rabbitmq_url_for_prefect = os.getenv('rabbitmq_url')
 
     if not rabbitmq_url_for_prefect:
         raise RuntimeError("RabbitMQ URL not found in Prefect secret or environment variable.")
     
-    connection = None
-    if rabbitmq_url_for_prefect:
-     params = pika.URLParameters(rabbitmq_url_for_prefect)
-     params.heartbeat = 600
-     for attempt in range(10): 
-         try:
-             connection = pika.BlockingConnection(params)
-             print("Connected to RabbitMQ!")
-             return connection
-         except AMQPConnectionError:
-             print(f"RabbitMQ not ready yet, retrying in 3s... (attempt {attempt+1})")
-             time.sleep(3)
-    return connection
+    params = pika.URLParameters(rabbitmq_url_for_prefect)
+    params.heartbeat = 600
+
+    for attempt in range(10):
+        try:
+            connection = pika.BlockingConnection(params)
+            print("Connected to RabbitMQ!")
+            return connection
+        except AMQPConnectionError:
+            print(f"RabbitMQ not ready yet, retrying in 3s... (attempt {attempt+1})")
+            time.sleep(3)
+
+    raise RuntimeError("Failed to connect to RabbitMQ after 10 attempts.")
 
 
 def get_brevo_headers():
