@@ -1,6 +1,7 @@
 import pika
+from pika.exceptions import AMQPConnectionError
 
-import os 
+import os,time
 from dotenv import load_dotenv
 
 from prefect.blocks.system import Secret
@@ -17,9 +18,17 @@ def get_connection():
     connection = None
     print(f"rabbitmq_url: {rabbitmq_url}")
     if rabbitmq_url:
-      params = pika.URLParameters(rabbitmq_url)
-      connection = pika.BlockingConnection(params)
+        params = pika.URLParameters(rabbitmq_url)
+        params.heartbeat = 600  
+        for attempt in range(10):
+            try:
+                connection = pika.BlockingConnection(params)
+                print("Connected to RabbitMQ!")
+            except AMQPConnectionError:
+                print(f"RabbitMQ not ready yet, retrying in 3s... (attempt {attempt+1})")
+                time.sleep(3)
     return connection
+
 
 def get_connection_for_prefect():
     rabbitmq_url_for_prefect = None
@@ -32,10 +41,17 @@ def get_connection_for_prefect():
 
     if not rabbitmq_url_for_prefect:
         raise RuntimeError("RabbitMQ URL not found in Prefect secret or environment variable.")
-
-    params = pika.URLParameters(rabbitmq_url_for_prefect)
-    params.heartbeat = 600
-    connection = pika.BlockingConnection(params)
+    
+    connection = None
+    if rabbitmq_url_for_prefect:
+     params = pika.URLParameters(rabbitmq_url_for_prefect)
+     params.heartbeat = 600
+     for attempt in range(10): 
+         try:
+             connection = pika.BlockingConnection(params)
+         except AMQPConnectionError:
+             print(f"RabbitMQ not ready yet, retrying in 3s... (attempt {attempt+1})")
+             time.sleep(3)
     return connection
 
 
