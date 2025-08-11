@@ -22,13 +22,21 @@ def get_connection():
     return connection
 
 def get_connection_for_prefect():
- secret = Secret.load("aws-ec2-domain")
- assert isinstance(secret, Secret)
- rabbitmq_url_for_prefect = secret.get()
- params = pika.URLParameters(rabbitmq_url_for_prefect)
- params.heartbeat = 600
- connection = pika.BlockingConnection(params)
- return connection
+    rabbitmq_url_for_prefect = None
+    try:
+        secret = Secret.load("aws-ec2-domain")
+        assert isinstance(secret, Secret)
+        rabbitmq_url_for_prefect = secret.get()
+    except Exception as e:
+        rabbitmq_url_for_prefect = os.getenv('aws-ec2-domain')
+
+    if not rabbitmq_url_for_prefect:
+        raise RuntimeError("RabbitMQ URL not found in Prefect secret or environment variable.")
+
+    params = pika.URLParameters(rabbitmq_url_for_prefect)
+    params.heartbeat = 600
+    connection = pika.BlockingConnection(params)
+    return connection
 
 
 def get_brevo_headers():
