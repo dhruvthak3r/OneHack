@@ -14,7 +14,5 @@ services:
   backend:
      image: dhruvthak3r/onehack-backend:latest
      container_name: onehack-backend
-     depends_on:
-        - rabbitmq
      ports:
         - "8080:8080"
