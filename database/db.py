@@ -33,7 +33,7 @@ def get_db_connection_for_prefect():
         secret = Secret.load("aws-rds-url")
         assert isinstance(secret, Secret)
         db_url = secret.get()
-        engine = create_engine(db_url, echo=True)
+        engine = create_engine(db_url, pool_size=20,pool_timeout=60,pool_recycle=1800,echo=True)
         engine.connect()
         print("Database connection established successfully.")
         return engine

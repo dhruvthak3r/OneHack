@@ -17,11 +17,13 @@ import requests
 from dotenv import load_dotenv
 load_dotenv()
 
+
+engine = connect_to_db()
+Session = sessionmaker(bind=engine)
+
 def hackathon_worker(ch, method, properties, body):
     
-    engine = connect_to_db()
-
-    Session = sessionmaker(bind=engine)
+    
 
     with Session.begin() as session:
       
@@ -31,29 +33,29 @@ def hackathon_worker(ch, method, properties, body):
       hackathon_query = select(Hackathon.Hackathon_name,Hackathon.Hackathon_url,Hackathon.start_date,Hackathon.reg_end_date).where(Hackathon.Hackathon_id == json.loads(body.decode())["hackathon_id"])
       hackathon_result = session.execute(hackathon_query).first()
 
-      if user_result is not None:
-          name, email = user_result
+    if user_result is not None:
+        name, email = user_result
           
-      else:
-          name, email = None, None
+    else:
+        name, email = None, None
         
-      if hackathon_result is not None:
-          hackathon_name,url,start_date,reg_end_date = hackathon_result
+    if hackathon_result is not None:
+        hackathon_name,url,start_date,reg_end_date = hackathon_result
           
 
-      else:
-          hackathon_name,url,start_date,reg_end_date = None,None,None,None
+    else:
+        hackathon_name,url,start_date,reg_end_date = None,None,None,None
         
 
-      email_html_template = generate_email_template(
+    email_html_template = generate_email_template(
             name if name is not None else "",
             hackathon_name if hackathon_name is not None else "",
             start_date if start_date is not None else "",
             reg_end_date if reg_end_date is not None else "",
             url if url is not None else ""
         )
-      to_email = email
-      enqueue_emails(email_html_template, name,to_email)
+    to_email = email
+    enqueue_emails(email_html_template, name,to_email)
           
           
     

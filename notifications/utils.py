@@ -9,7 +9,7 @@ load_dotenv()
 
 brevo_api_key = os.getenv('brevo_api_key')
 
-
+sender_email = os.getenv('brevo_sender_email')
 rabbitmq_url = os.getenv('aws-ec2-domain')
 
 

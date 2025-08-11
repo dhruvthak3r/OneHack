@@ -20,5 +20,4 @@ def enqueue_hackathons(payload):
     channel.basic_publish(exchange='hackathon',routing_key='user-queue',body=json.dumps(payload),properties=pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent))
 
 
-
     connection.close()
