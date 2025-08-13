@@ -1,20 +1,15 @@
-
-import sys, os
-import json
-
-from notifications.utils import get_connection,get_brevo_headers,get_brevo_payload
-from notifications.email_templates import generate_email_template
-from notifications.senders.send_emails import enqueue_emails
-
+import sys, os, time, json, traceback
+from dotenv import load_dotenv
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
+from notifications.utils import get_connection
+from notifications.email_templates import generate_email_template
+from notifications.senders.send_emails import enqueue_emails
+
 from database.db import connect_to_db
-from database.tables import Users,Hackathon
+from database.tables import Users, Hackathon
 
-import requests
-
-from dotenv import load_dotenv
 load_dotenv()
 
 
@@ -22,70 +17,67 @@ engine = connect_to_db()
 Session = sessionmaker(bind=engine)
 
 def hackathon_worker(ch, method, properties, body):
-    
-    
+    try:
+        payload = json.loads(body.decode())
+        user_sub = payload.get("user_sub")
+        hackathon_id = payload.get("hackathon_id")
 
-    with Session.begin() as session:
-      
-      user_query = select(Users.name ,Users.email).where(Users.sub == json.loads(body.decode())["user_sub"])
-      user_result = session.execute(user_query).first()
+        with Session.begin() as session:
+            user_result = session.execute(
+                select(Users.name, Users.email).where(Users.sub == user_sub)
+            ).first()
 
-      hackathon_query = select(Hackathon.Hackathon_name,Hackathon.Hackathon_url,Hackathon.start_date,Hackathon.reg_end_date).where(Hackathon.Hackathon_id == json.loads(body.decode())["hackathon_id"])
-      hackathon_result = session.execute(hackathon_query).first()
+            hackathon_result = session.execute(
+                select(
+                    Hackathon.Hackathon_name,
+                    Hackathon.Hackathon_url,
+                    Hackathon.start_date,
+                    Hackathon.reg_end_date
+                ).where(Hackathon.Hackathon_id == hackathon_id)
+            ).first()
 
-    if user_result is not None:
-        name, email = user_result
-          
-    else:
-        name, email = None, None
+        name, email = user_result if user_result else ("", None)
+        hackathon_name, url, start_date, reg_end_date = hackathon_result if hackathon_result else ("", "", "", "")
+
+        if email:
+            email_html_template = generate_email_template(
+                name, hackathon_name, start_date, reg_end_date, url
+            )
+            enqueue_emails(email_html_template, name, email)
+
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    except Exception as e:
+        print(f"[ERROR] Failed to process message: {e}")
+        traceback.print_exc()
         
-    if hackathon_result is not None:
-        hackathon_name,url,start_date,reg_end_date = hackathon_result
-          
+        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
-    else:
-        hackathon_name,url,start_date,reg_end_date = None,None,None,None
-        
+def start_consumer():
+    while True:
+        try:
+            connection = get_connection()
+            if connection is None:
+                raise RuntimeError("Failed to establish RabbitMQ connection")
 
-    email_html_template = generate_email_template(
-            name if name is not None else "",
-            hackathon_name if hackathon_name is not None else "",
-            start_date if start_date is not None else "",
-            reg_end_date if reg_end_date is not None else "",
-            url if url is not None else ""
-        )
-    to_email = email
-    enqueue_emails(email_html_template, name,to_email)
-          
-          
-    
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+            channel = connection.channel()
+            channel.exchange_declare(exchange='hackathon', exchange_type='direct')
+            channel.queue_declare(queue='user-queue', durable=True)
+            channel.queue_bind(queue='user-queue', exchange='hackathon', routing_key='user-queue')
+            channel.basic_qos(prefetch_count=1)
+            channel.basic_consume(queue='user-queue', on_message_callback=hackathon_worker)
 
+            print("[INFO] Consumer started. Waiting for messages...")
+            channel.start_consuming()
+
+        except KeyboardInterrupt:
+            print("[INFO] Consumer interrupted. Exiting...")
+            sys.exit(0)
+
+        except Exception as e:
+            print(f"[ERROR] Consumer crashed: {e}. Reconnecting in 5 seconds...")
+            traceback.print_exc()
+            time.sleep(5)
 
 if __name__ == '__main__':
-    try:
-       
-        connection = get_connection()
-        if connection is None:
-            raise RuntimeError("Failed to establish a connection. get_connection() returned None.")
-        channel = connection.channel()
-
-        channel.exchange_declare(exchange='hackathon', exchange_type='direct')
-   
-        channel.queue_declare(queue='user-queue',durable=True)
-        channel.queue_bind(queue='user-queue',exchange='hackathon',routing_key='user-queue')
-        
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(queue='user-queue', on_message_callback=hackathon_worker)
-
-      
-
-        channel.start_consuming()
-       
-
-    except KeyboardInterrupt:
-        print('Interrupted')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+    start_consumer()
