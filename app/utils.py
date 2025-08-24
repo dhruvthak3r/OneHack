@@ -6,8 +6,10 @@ from fastapi import FastAPI,Request
 from typing import Optional, List
 from models.schemas import HackathonResultSchema
 from database.tables import Platform, Hackathon,Bookmarks,Users
+
 from sqlalchemy.orm import Session,sessionmaker
 from sqlalchemy import select, join
+from sqlalchemy.sql import func
 
 from contextlib import asynccontextmanager
 
@@ -23,7 +25,7 @@ async def get_hackathons_by_platform(
 ):
     query = select(Hackathon).select_from(
         join(Hackathon, Platform, Hackathon.platform_id == Platform.p_id)
-    ).where(Platform.p_name == platform)
+    ).where(Platform.p_name == platform , Hackathon.end_date >= func.current_date())
     if mode:
         query = query.where(Hackathon.mode.in_(mode))
 
