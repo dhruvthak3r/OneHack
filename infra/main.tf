@@ -41,6 +41,7 @@ resource "aws_instance" "onehack-infra" {
     instance_type = var.ec2_instance_type
     vpc_security_group_ids = var.security_group_id_onehack
     key_name = var.ssh_key
+    associate_public_ip_address = true
 
     tags = {
         Name = "onehack-backend-infra"
@@ -48,6 +49,20 @@ resource "aws_instance" "onehack-infra" {
     tags_all = {
       Name = "onehack-backend infra"
     }
+}
+
+resource "aws_db_instance" "onehack-db" {
+  allocated_storage = 20
+  db_name = ""
+  engine = "mysql"
+  identifier = "onehack-1"
+  engine_version = "8.0.42"
+  instance_class = "db.t4g.micro"
+  username = "admin"
+  password = var.onehack-db-password
+  parameter_group_name = "default.mysql8.0"
+  skip_final_snapshot = false
+  storage_encrypted = true
 }
 
 resource "aws_security_group" "onehack" {
@@ -123,4 +138,40 @@ resource "aws_security_group" "onehack-db-sg" {
   protocol        = "-1"
   security_groups = var.security_group_id_rds
   }
+}
+
+
+output "ec2_instance_public_ip" {
+  value = aws_instance.onehack-infra.public_ip
+  
+}
+provider "vercel" {
+  api_token = var.vercel_api_token
+  team = var.vercel_team_id
+  
+}
+
+resource "vercel_dns_record" "root" {
+  domain = "onehack.live"
+  name = ""
+  type = "A"
+  ttl = 60
+  value = "216.198.79.1"
+}
+
+resource "vercel_dns_record" "backend" {
+  domain = "onehack.live"
+  name = "api"
+  type = "A"
+  ttl = 60
+  value = aws_instance.onehack-infra.public_ip
+  depends_on = [aws_instance.onehack-infra]
+}
+
+resource "vercel_dns_record" "worldwide" {
+  domain = "onehack.live"
+  name = "www"
+  type = "CNAME"
+  ttl = 60
+  value = "db4f1dd88db68245.vercel-dns-017.com"
 }
